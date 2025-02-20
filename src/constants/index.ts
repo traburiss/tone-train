@@ -9,9 +9,9 @@ export const TONE_TYPE_OPTIONS = [
   { label: '十二音阶', value: '12Tone' },
 ];
 
-export type TimberType = 'guitar-acoustic' | 'guitar-electric' | 'piano';
-export const DEFAULT_TIMBRE_TYPE = 'guitar-acoustic';
-export const TIMBRE_TYPE_OPTIONS = [
+export type InstrumentName = 'guitar-acoustic' | 'guitar-electric' | 'piano';
+export const DEFAULT_INSTRUMENT_NAME = 'guitar-acoustic';
+export const INSTRUMENT_NAME_OPTIONS = [
   { label: '原声吉他', value: 'guitar-acoustic' },
   { label: '电吉他', value: 'guitar-electric' },
   { label: '钢琴', value: 'piano' },
@@ -33,7 +33,7 @@ export const DEFAULT_RANDOM = true;
 
 export declare type TrainPlayerArgs = {
   toneType: ToneType;
-  timbreType: TimberType;
+  instrumentName: InstrumentName;
   toneList: string[];
   toneDuration: number; // ms
   toneWait: number; // ms,
@@ -44,7 +44,7 @@ export declare type TrainPlayerArgs = {
 
 export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
   toneType: DEFAULT_TONE_TYPE,
-  timbreType: DEFAULT_TIMBRE_TYPE,
+  instrumentName: DEFAULT_INSTRUMENT_NAME,
   toneList: DEFAULT_TONE_LIST,
   toneDuration: DEFAULT_TONE_DURATION,
   toneWait: DEFAULT_TONE_WAIT,

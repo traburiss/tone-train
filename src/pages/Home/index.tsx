@@ -4,7 +4,7 @@ import {
   DURATION_STEP,
   MAX_DURATION,
   MIX_DURATION,
-  TIMBRE_TYPE_OPTIONS,
+  INSTRUMENT_NAME_OPTIONS,
   TONE_TYPE_OPTIONS,
   TrainPlayerArgs,
 } from '@/constants';
@@ -72,11 +72,11 @@ const HomePage: React.FC = () => {
             options={TONE_TYPE_OPTIONS}
           />
           <ProFormRadio.Group
-            name="timbreType"
+            name="instrumentName"
             label="音色"
             required={true}
             radioType="button"
-            options={TIMBRE_TYPE_OPTIONS}
+            options={INSTRUMENT_NAME_OPTIONS}
           />
           <ProFormSlider
             name="toneDuration"

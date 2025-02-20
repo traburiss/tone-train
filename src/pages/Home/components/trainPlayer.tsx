@@ -1,9 +1,10 @@
 import { TrainPlayerArgs } from '@/constants';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
-import { Modal, Result } from 'antd';
+import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
 import styles from './trainPlayer.less';
+import { loadInstrument } from '@/utils/toneInstruments';
 
 const { confirm } = Modal;
 
@@ -12,10 +13,13 @@ export declare type TrainPlayerProps = TrainPlayerArgs & {
   onCancel: () => void;
 };
 const initIndex = 1;
-const synth = new Tone.Synth().toDestination();
+let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | null = null
+
 const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
   const [nextIndex, setNextIndex] = useState(initIndex);
+  const [api, contextHolder] = notification.useNotification();
 
   const sayTone = (tone: string) => {
     const utterance = new SpeechSynthesisUtterance(tone);
@@ -26,10 +30,10 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     const { toneList, toneDuration, toneWait } = props;
     const tone = toneList[index];
     console.info('playTone', tone, toneDuration);
-    const start = Tone.now();
-    const end = start + toneDuration / 1000;
-    synth.triggerAttack(tone, start);
-    synth.triggerRelease(end);
+    const toneDurationSecond = toneDuration / 1000;
+    if (tonePlayer != null) {
+      tonePlayer.triggerAttackRelease(tone, toneDurationSecond);
+    }
     if (props.ttsEnable) {
       return setTimeout(() => {
         sayTone(toneList[index]);
@@ -42,7 +46,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   useEffect(() => {
     console.info('useEffect 1 ', paused);
     if (paused) {
-      synth.triggerRelease(Tone.now());
+      if (tonePlayer != null) {
+        tonePlayer.triggerRelease(Tone.now());
+      }
       return;
     }
     console.info('useEffect 2 ', props);
@@ -68,7 +74,23 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     if (props.open) {
       console.info('open 2 ');
       setNextIndex(initIndex);
-      setPaused(false);
+      setLoading(true)
+      console.info(`open 3 load instrumentName ${props.instrumentName}`)
+      loadInstrument(props.instrumentName)
+        .then((sample: Tone.Sampler) => {
+          console.info(`load instrumentName ${props.instrumentName} success`)
+          tonePlayer = sample
+        })
+        .catch((e: any) =>  {
+          console.info(`load instrumentName ${props.instrumentName} error`, e)
+          api['error']({ message: '异常', description: '无法加载音色，只能播放MIDI音', })
+          tonePlayer = new Tone.Synth().toDestination();
+        })
+        .finally(()=>{
+          setLoading(false);
+          setPaused(false);
+        })
+      
     }
   }, [props.open]);
 
@@ -94,25 +116,30 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   };
 
   return (
-    <Modal
-      open={props.open}
-      destroyOnClose={true}
-      width={'80%'}
-      height={'80%'}
-      maskClosable={false}
-      okText={paused ? '恢复训练' : '暂停训练'}
-      onOk={pauseTrain}
-      cancelText={'停止训练'}
-      onCancel={confirmCancel}
-    >
-      <div>{JSON.stringify(props)}</div>
-      <Result
-        className={styles.trainPlayInfo}
-        title={props.toneList ? props?.toneList[nextIndex - 1] : '没有任何音'}
-        subTitle="当前的音是"
-        icon={<SoundOutlined />}
-      />
-    </Modal>
+    <>
+      {contextHolder}
+      <Modal
+        open={props.open}
+        destroyOnClose={true}
+        width={'80%'}
+        height={'80%'}
+        maskClosable={false}
+        okText={paused ? '恢复训练' : '暂停训练'}
+        onOk={pauseTrain}
+        cancelText={'停止训练'}
+        onCancel={confirmCancel}
+        loading={loading}
+        title={loading ?'加载音色中': '训练'}
+      >
+        <div>{JSON.stringify(props)}</div>
+        <Result
+          className={styles.trainPlayInfo}
+          title={props.toneList ? props?.toneList[nextIndex - 1] : '没有任何音'}
+          subTitle="当前的音是"
+          icon={<SoundOutlined />}
+        />
+      </Modal>
+    </>
   );
 };
 
