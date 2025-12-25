@@ -1,4 +1,4 @@
-import { defineConfig } from '@umijs/max';
+import { defineConfig } from "@umijs/max";
 
 export default defineConfig({
   antd: {},
@@ -7,19 +7,21 @@ export default defineConfig({
   initialState: {},
   request: {},
   layout: {
-    title: '听音训练',
-    layout: 'top',
+    title: "听音训练",
+    layout: "top",
     menuRender: false,
     siderWidth: 0,
   },
-  favicons: ['/logo.png'],
+  favicons: ["/logo.png"],
   routes: [
     {
-      name: '欢迎使用音阶训练',
-      path: '/',
-      component: './Home',
+      name: "欢迎使用音阶训练",
+      path: "/",
+      component: "./Home",
     },
   ],
-  npmClient: 'pnpm',
+
+  npmClient: "pnpm",
   esbuildMinifyIIFE: true,
+  tailwindcss: {},
 });

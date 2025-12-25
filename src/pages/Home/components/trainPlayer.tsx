@@ -1,10 +1,10 @@
 import { TrainPlayerArgs } from '@/constants';
+import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
 import styles from './trainPlayer.less';
-import { loadInstrument } from '@/utils/toneInstruments';
 
 const { confirm } = Modal;
 
@@ -13,7 +13,7 @@ export declare type TrainPlayerProps = TrainPlayerArgs & {
   onCancel: () => void;
 };
 const initIndex = 1;
-let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | null = null
+let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | null = null;
 
 const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
@@ -26,71 +26,105 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     window.speechSynthesis.speak(utterance);
   };
 
-  const playTone = (index: number, props: TrainPlayerProps) => {
-    const { toneList, toneDuration, toneWait } = props;
-    const tone = toneList[index];
-    console.info('playTone', tone, toneDuration);
-    const toneDurationSecond = toneDuration / 1000;
-    if (tonePlayer != null) {
-      tonePlayer.triggerAttackRelease(tone, toneDurationSecond);
+  const playTone = async (tone: string, duration: number) => {
+    console.info('playTone', tone, duration);
+    if (tonePlayer !== null) {
+      tonePlayer.triggerAttackRelease(tone, duration / 1000);
     }
-    if (props.ttsEnable) {
-      return setTimeout(() => {
-        sayTone(toneList[index]);
-      }, toneDuration + toneWait);
-    } else {
-      return null;
-    }
+    return new Promise((resolve) => {
+      setTimeout(resolve, duration);
+    });
   };
 
+  const totalWaitTime =
+    props.toneDuration +
+    props.toneWait +
+    props.ttsWait +
+    (props.referenceNoteEnabled ? props.toneDuration + props.toneWait : 0);
+
   useEffect(() => {
-    console.info('useEffect 1 ', paused);
     if (paused) {
-      if (tonePlayer != null) {
+      if (tonePlayer !== null) {
         tonePlayer.triggerRelease(Tone.now());
       }
       return;
     }
-    console.info('useEffect 2 ', props);
+
+    let currentLoop = 0;
     const toneLen = props.toneList.length;
-    const totalWait = props.toneDuration + props.toneWait + props.ttsWait;
-    let ttsTimer = playTone(nextIndex - 1, props);
-    const timer = setInterval(() => {
+
+    const runStep = async () => {
       setNextIndex((prev) => {
-        ttsTimer = playTone(prev, props);
-        return prev < toneLen ? prev + 1 : initIndex;
+        const idx = prev - 1;
+
+        // Determine target note
+        let targetIdx = idx;
+        if (props.random) {
+          targetIdx = Math.floor(Math.random() * toneLen);
+        }
+        const tone = props.toneList[targetIdx];
+
+        // Play sequence
+        const sequence = async () => {
+          if (props.referenceNoteEnabled && props.referenceNote) {
+            await playTone(props.referenceNote, props.toneDuration);
+            await new Promise((r) => {
+              setTimeout(r, props.toneWait);
+            });
+          }
+          await playTone(tone, props.toneDuration);
+          if (props.ttsEnable) {
+            setTimeout(() => sayTone(tone), props.toneWait);
+          }
+        };
+        sequence();
+
+        // Handle loop count
+        const isLast = prev >= toneLen;
+        if (isLast) {
+          currentLoop++;
+          if (props.loopCount > 0 && currentLoop >= props.loopCount) {
+            setPaused(true);
+            return initIndex;
+          }
+        }
+
+        return isLast ? initIndex : prev + 1;
       });
-    }, totalWait);
+    };
+
+    runStep();
+    const timer = setInterval(runStep, totalWaitTime);
+
     return () => {
       clearInterval(timer);
-      if (ttsTimer !== null) {
-        clearTimeout(ttsTimer);
-      }
     };
-  }, [paused]);
+  }, [paused, props]); // Added props to dependency array as it's used inside useEffect
 
   useEffect(() => {
     console.info('open 1 ', props);
     if (props.open) {
       console.info('open 2 ');
       setNextIndex(initIndex);
-      setLoading(true)
-      console.info(`open 3 load instrumentName ${props.instrumentName}`)
+      setLoading(true);
+      console.info(`open 3 load instrumentName ${props.instrumentName}`);
       loadInstrument(props.instrumentName)
         .then((sample: Tone.Sampler) => {
-          console.info(`load instrumentName ${props.instrumentName} success`)
-          tonePlayer = sample
+          console.info(`load instrumentName ${props.instrumentName} success`);
+          tonePlayer = sample;
         })
-        .catch((e: any) =>  {
-          console.info(`load instrumentName ${props.instrumentName} error`, e)
-          api['error']({ message: '异常', description: '无法加载音色，只能播放MIDI音', })
+        .catch((e: any) => {
+          console.info(`load instrumentName ${props.instrumentName} error`, e);
+          api['error']({
+            message: '异常',
+            description: '无法加载音色，只能播放MIDI音',
+          });
           tonePlayer = new Tone.Synth().toDestination();
         })
-        .finally(()=>{
+        .finally(() => {
           setLoading(false);
           setPaused(false);
-        })
-      
+        });
     }
   }, [props.open]);
 
@@ -129,7 +163,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         cancelText={'停止训练'}
         onCancel={confirmCancel}
         loading={loading}
-        title={loading ?'加载音色中': '训练'}
+        title={loading ? '加载音色中' : '训练'}
       >
         <div>{JSON.stringify(props)}</div>
         <Result

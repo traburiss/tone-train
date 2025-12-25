@@ -1,7 +1,6 @@
 import * as Tone from 'tone';
 
-
-const toneCache: Record<string, Tone.Sampler> = {}
+const toneCache: Record<string, Tone.Sampler> = {};
 
 const toneSamplerMap: Record<string, Record<string, string>> = {
   'bass-electric': {
@@ -507,12 +506,12 @@ const toneSamplerMap: Record<string, Record<string, string>> = {
 
 export const loadInstrument = async (instrumentsName: string) => {
   const samplerMap = toneSamplerMap[instrumentsName];
-  if (samplerMap == null) {
+  if (samplerMap === undefined || samplerMap === null) {
     throw new Error(`no such instruments: ${instrumentsName}`);
   }
 
   const sampleCache = toneCache[instrumentsName];
-  if (sampleCache != null) {
+  if (sampleCache !== undefined && sampleCache !== null) {
     return sampleCache;
   }
 
