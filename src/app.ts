@@ -8,9 +8,14 @@ export async function getInitialState(): Promise<{ name: string }> {
 
 export const layout = () => {
   return {
-    logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
+    logo: '/logo.png',
+    title: '听音训练',
     menu: {
       locale: false,
     },
+    layout: 'top',
+    menuRender: false,
+    rightContentRender: false, // 移除右上角用户登录信息
+    actionsRender: false, // 移除其他操作图标
   };
 };

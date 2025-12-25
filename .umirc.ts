@@ -7,9 +7,12 @@ export default defineConfig({
   initialState: {},
   request: {},
   layout: {
-    title: 'tone-train',
+    title: '听音训练',
+    layout: 'top',
     menuRender: false,
+    siderWidth: 0,
   },
+  favicons: ['/logo.png'],
   routes: [
     {
       name: '欢迎使用音阶训练',
@@ -18,4 +21,5 @@ export default defineConfig({
     },
   ],
   npmClient: 'pnpm',
+  esbuildMinifyIIFE: true,
 });
