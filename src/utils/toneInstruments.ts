@@ -518,7 +518,7 @@ export const loadInstrument = async (instrumentsName: string) => {
   const sampler = new Tone.Sampler({
     urls: samplerMap,
     release: 1,
-    baseUrl: `/samples/${instrumentsName}/`,
+    baseUrl: `samples/${instrumentsName}/`,
   }).toDestination();
   await Tone.loaded();
   toneCache[instrumentsName] = sampler;
