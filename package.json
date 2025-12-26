@@ -3,6 +3,7 @@
   "author": "traburiss <marlycool@qq.com>",
   "scripts": {
     "build": "max build",
+    "deploy": "max build && gh-pages -d dist",
     "dev": "max dev",
     "format": "prettier --cache --write .",
     "postinstall": "max setup",

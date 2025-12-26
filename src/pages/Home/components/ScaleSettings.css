@@ -33,6 +33,23 @@
   .touch-button-group .ant-checkbox-wrapper:active {
     @apply scale-95 opacity-80;
   }
+
+  /* 修复 octave-row 对齐问题 - 桌面端让控制区域与第一行音符对齐 */
+  @media (min-width: 640px) {
+    .octave-row {
+      align-items: flex-start !important;
+    }
+
+    /* 为左侧控制区域添加顶部 padding，与 ant-form-item 的默认间距匹配 */
+    .octave-row > div:first-child {
+      padding-top: 5px;
+    }
+
+    /* 移除音符区域的 ant-form-item 默认底部 margin，减少下边缘空白 */
+    .octave-row .ant-form-item {
+      margin-bottom: 0 !important;
+    }
+  }
 }
 
 /* Global layout overrides for mobile compactness */

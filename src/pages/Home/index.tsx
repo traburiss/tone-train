@@ -7,6 +7,7 @@ import {
   MAX_DURATION,
   MIX_DURATION,
   OCTAVES,
+  REFERENCE_NOTE_OPTIONS,
   TrainPlayerArgs,
 } from '@/constants';
 import ScaleSettings from '@/pages/Home/components/ScaleSettings';
@@ -15,6 +16,8 @@ import {
   FooterToolbar,
   PageContainer,
   ProForm,
+  ProFormDependency,
+  ProFormDigit,
   ProFormRadio,
   ProFormSelect,
   ProFormSlider,
@@ -58,10 +61,24 @@ const HomePage: React.FC = () => {
         if (parsed.toneList && !parsed.toneListGroup) {
           parsed.toneListGroup = groupTones(parsed.toneList);
         }
-        form.setFieldsValue(parsed);
+        const loopCountType =
+          parsed.loopCountType || String(parsed.loopCount || 0);
+        const loopCountCustom =
+          parsed.loopCountCustom || parsed.loopCount || 10;
+
+        form.setFieldsValue({
+          ...parsed,
+          loopCountType,
+          loopCountCustom: loopCountType === 'custom' ? loopCountCustom : 10,
+        });
+
         setTonePlayerArgs({
           ...DEFAULT_TRAIN_PLAYER_ARGS,
           ...parsed,
+          loopCount:
+            loopCountType === 'custom'
+              ? loopCountCustom
+              : parseInt(loopCountType, 10),
           toneList: flattenGroupedTones(parsed.toneListGroup),
         });
       } catch (e) {
@@ -76,7 +93,16 @@ const HomePage: React.FC = () => {
 
   const formCommit = (v: any) => {
     const toneList = flattenGroupedTones(v.toneListGroup);
-    const finalArgs = { ...v, toneList };
+    const loopCount =
+      v.loopCountType === 'custom'
+        ? v.loopCountCustom
+        : parseInt(v.loopCountType, 10);
+    const finalArgs = {
+      ...DEFAULT_TRAIN_PLAYER_ARGS,
+      ...v,
+      toneList,
+      loopCount: isNaN(loopCount) ? 0 : loopCount,
+    };
     setTonePlayerArgs(finalArgs);
     setTonePlayerOpen(true);
   };
@@ -88,6 +114,8 @@ const HomePage: React.FC = () => {
         size={'large'}
         initialValues={{
           ...DEFAULT_TRAIN_PLAYER_ARGS,
+          loopCountType: String(DEFAULT_TRAIN_PLAYER_ARGS.loopCount),
+          loopCountCustom: 10,
           toneListGroup: groupTones(DEFAULT_TRAIN_PLAYER_ARGS.toneList),
         }}
         onValuesChange={onValuesChange}
@@ -108,55 +136,87 @@ const HomePage: React.FC = () => {
             <ProFormRadio.Group
               name="instrumentName"
               label="音色"
-              required={true}
               radioType="button"
               options={INSTRUMENT_NAME_OPTIONS}
             />
-            <ProFormSelect
-              name="loopCount"
+            <ProFormRadio.Group
+              name="loopCountType"
               label="循环次数"
-              width="sm"
+              radioType="button"
               options={LOOP_COUNT_OPTIONS}
             />
+            <ProFormDependency name={['loopCountType']}>
+              {({ loopCountType }) =>
+                loopCountType === 'custom' && (
+                  <ProFormDigit
+                    name="loopCountCustom"
+                    label="自定义次数"
+                    width="xs"
+                    min={1}
+                    max={1000}
+                    fieldProps={{ precision: 0 }}
+                  />
+                )
+              }
+            </ProFormDependency>
           </ProForm.Group>
           <ProForm.Group size={8}>
             <ProFormSwitch name="ttsEnable" label="语音报号" />
             <ProFormSwitch name="random" label="随机播放" />
             <ProFormSwitch name="referenceNoteEnabled" label="播放对比基准音" />
+            <ProFormDependency name={['referenceNoteEnabled']}>
+              {({ referenceNoteEnabled }) =>
+                referenceNoteEnabled && (
+                  <ProFormSelect
+                    name="referenceNote"
+                    label="基准音"
+                    width="xs"
+                    options={REFERENCE_NOTE_OPTIONS}
+                  />
+                )
+              }
+            </ProFormDependency>
+            <ProFormSwitch name="showAdvanced" label="显示高级设置" />
           </ProForm.Group>
         </Card>
 
-        <Card title="播放参数" className="mb-3 sm:mb-6">
-          <ProForm.Group>
-            <ProFormSlider
-              name="toneDuration"
-              label="音阶时长"
-              width="md"
-              fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
-              min={MIX_DURATION}
-              max={MAX_DURATION}
-              step={DURATION_STEP}
-            />
-            <ProFormSlider
-              name="toneWait"
-              label="音阶播后等待"
-              width="md"
-              fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
-              min={MIX_DURATION}
-              max={MAX_DURATION}
-              step={DURATION_STEP}
-            />
-            <ProFormSlider
-              name="ttsWait"
-              label="报号后等待"
-              width="md"
-              fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
-              min={MIX_DURATION}
-              max={MAX_DURATION}
-              step={DURATION_STEP}
-            />
-          </ProForm.Group>
-        </Card>
+        <ProFormDependency name={['showAdvanced']}>
+          {({ showAdvanced }) =>
+            showAdvanced && (
+              <Card title="播放参数" className="mb-3 sm:mb-6">
+                <ProForm.Group>
+                  <ProFormSlider
+                    name="toneDuration"
+                    label="音阶时长"
+                    width="md"
+                    fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+                    min={MIX_DURATION}
+                    max={MAX_DURATION}
+                    step={DURATION_STEP}
+                  />
+                  <ProFormSlider
+                    name="toneWait"
+                    label="音阶播后等待"
+                    width="md"
+                    fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+                    min={MIX_DURATION}
+                    max={MAX_DURATION}
+                    step={DURATION_STEP}
+                  />
+                  <ProFormSlider
+                    name="ttsWait"
+                    label="报号后等待"
+                    width="md"
+                    fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+                    min={MIX_DURATION}
+                    max={MAX_DURATION}
+                    step={DURATION_STEP}
+                  />
+                </ProForm.Group>
+              </Card>
+            )
+          }
+        </ProFormDependency>
       </ProForm>
       <TrainPlayer
         open={tonePlayerOpen}

@@ -9,12 +9,20 @@ import {
   ProFormDependency,
   ProFormRadio,
 } from '@ant-design/pro-components';
+import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Space } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import './ScaleSettings.css';
 
 const ScaleSettings: React.FC = () => {
   const form = Form.useFormInstance();
+  const [expandedOctaves, setExpandedOctaves] = useState<number[]>([]);
+
+  const toggleOctave = (oct: number) => {
+    setExpandedOctaves((prev) =>
+      prev.includes(oct) ? prev.filter((o) => o !== oct) : [...prev, oct],
+    );
+  };
 
   const handleSelectAllOctave = (
     oct: number,
@@ -62,19 +70,21 @@ const ScaleSettings: React.FC = () => {
                 >
                   全选
                 </Button>
-                <Button
-                  size="small"
-                  onClick={() => handleSelectMajorGlobal(true)}
-                >
-                  全音
-                </Button>
+                {toneType !== '8Tone' && (
+                  <Button
+                    size="small"
+                    onClick={() => handleSelectMajorGlobal(true)}
+                  >
+                    全音
+                  </Button>
+                )}
               </Space>
               <div className="w-[1px] h-[14px] bg-[#e8e8e8]" />
               <ProFormRadio.Group
                 name="toneType"
                 noStyle
                 radioType="button"
-                fieldProps={{ size: 'small' }}
+                // fieldProps={{ size: 'small' }}
                 options={TONE_TYPE_OPTIONS}
               />
             </Space>
@@ -113,27 +123,49 @@ const ScaleSettings: React.FC = () => {
                       >
                         全选
                       </Button>
-                      <Button
-                        size="small"
-                        type={isMajorSelected ? 'primary' : 'default'}
-                        onClick={() =>
-                          handleSelectMajorOctave(oct, !isMajorSelected)
-                        }
-                        className="text-[12px]"
-                      >
-                        全音
-                      </Button>
+                      {toneType !== '8Tone' && (
+                        <Button
+                          size="small"
+                          type={isMajorSelected ? 'primary' : 'default'}
+                          onClick={() =>
+                            handleSelectMajorOctave(oct, !isMajorSelected)
+                          }
+                          className="text-[12px]"
+                        >
+                          全音
+                        </Button>
+                      )}
                     </Space>
                     <span className="text-[11px] sm:text-[12px] color-[#888] ml-1 min-w-[20px]">
                       ({currentOctSelected.length})
                     </span>
+                    
+                    {/* Mobile Toggle Button */}
+                    <Button
+                      type="text"
+                      size="small"
+                      className="sm:hidden ml-auto flex items-center gap-1 text-[#1890ff]"
+                      onClick={() => toggleOctave(oct)}
+                    >
+                      {expandedOctaves.includes(oct) ? (
+                        <>
+                          收起 <DownOutlined className="text-[10px]" />
+                        </>
+                      ) : (
+                        <>
+                          展开 <RightOutlined className="text-[10px]" />
+                        </>
+                      )}
+                    </Button>
                   </div>
 
                   {/* Divider */}
                   <div className="hidden sm:block w-[1px] h-6 bg-[#e8e8e8]" />
 
                   {/* Notes Group */}
-                  <div className="flex flex-wrap gap-1.5 flex-1 w-full">
+                  <div
+                    className={`${expandedOctaves.includes(oct) ? 'flex' : 'hidden sm:flex'} flex-wrap gap-1.5 flex-1 w-full`}
+                  >
                     <ProFormCheckbox.Group
                       name={['toneListGroup', oct]}
                       className="touch-button-group"

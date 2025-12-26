@@ -12,14 +12,18 @@ export declare type TrainPlayerProps = TrainPlayerArgs & {
   open: boolean;
   onCancel: () => void;
 };
-const initIndex = 1;
 let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | null = null;
 
 const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
-  const [nextIndex, setNextIndex] = useState(initIndex);
+  const [currentTone, setCurrentTone] = useState<string>('...');
   const [api, contextHolder] = notification.useNotification();
+
+  // Ref to track the sequential index (0 to length-1) across intervals
+  const seqIndexRef = React.useRef(0);
+  // Ref to track loop count
+  const loopCountRef = React.useRef(0);
 
   const sayTone = (tone: string) => {
     const utterance = new SpeechSynthesisUtterance(tone);
@@ -36,76 +40,136 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     });
   };
 
-  const totalWaitTime =
-    props.toneDuration +
-    props.toneWait +
-    props.ttsWait +
-    (props.referenceNoteEnabled ? props.toneDuration + props.toneWait : 0);
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+
+  const totalWaitTime = React.useMemo(() => {
+    const base =
+      (props.toneDuration || 0) +
+      (props.toneWait || 0) +
+      (props.ttsWait || 0) +
+      (props.referenceNoteEnabled
+        ? (props.toneDuration || 0) + (props.toneWait || 0)
+        : 0);
+    return Math.max(base, 500); // Minimum 500ms safety
+  }, [
+    props.toneDuration,
+    props.toneWait,
+    props.ttsWait,
+    props.referenceNoteEnabled,
+  ]);
 
   useEffect(() => {
-    if (paused) {
+    if (paused || !props.open) {
       if (tonePlayer !== null) {
         tonePlayer.triggerRelease(Tone.now());
       }
       return;
     }
 
-    let currentLoop = 0;
-    const toneLen = props.toneList.length;
+    let isCancelled = false;
+    let ttsTimer: NodeJS.Timeout | null = null;
+    let refWaitTimer: NodeJS.Timeout | null = null;
 
     const runStep = async () => {
-      setNextIndex((prev) => {
-        const idx = prev - 1;
+      if (isCancelled) return;
 
-        // Determine target note
-        let targetIdx = idx;
-        if (props.random) {
-          targetIdx = Math.floor(Math.random() * toneLen);
-        }
-        const tone = props.toneList[targetIdx];
+      const currentProps = propsRef.current;
+      const toneLen = currentProps.toneList.length;
+      if (toneLen === 0) return;
 
-        // Play sequence
-        const sequence = async () => {
-          if (props.referenceNoteEnabled && props.referenceNote) {
-            await playTone(props.referenceNote, props.toneDuration);
-            await new Promise((r) => {
-              setTimeout(r, props.toneWait);
-            });
-          }
-          await playTone(tone, props.toneDuration);
-          if (props.ttsEnable) {
-            setTimeout(() => sayTone(tone), props.toneWait);
-          }
-        };
-        sequence();
+      // 1. Determine target index
+      let targetIdx = 0;
+      if (currentProps.random) {
+        targetIdx = Math.floor(Math.random() * toneLen);
+      } else {
+        targetIdx = seqIndexRef.current;
+      }
 
-        // Handle loop count
-        const isLast = prev >= toneLen;
-        if (isLast) {
-          currentLoop++;
-          if (props.loopCount > 0 && currentLoop >= props.loopCount) {
+      // 2. Get Tone
+      const tone = currentProps.toneList[targetIdx];
+
+      // 3. Update State for Display
+      setCurrentTone(tone);
+
+      // 4. Update Sequential Logic for NEXT time
+      if (!currentProps.random) {
+        seqIndexRef.current++;
+        if (seqIndexRef.current >= toneLen) {
+          seqIndexRef.current = 0;
+          loopCountRef.current++;
+
+          // Check loop termination
+          if (
+            Number(currentProps.loopCount) > 0 &&
+            loopCountRef.current >= Number(currentProps.loopCount)
+          ) {
             setPaused(true);
-            return initIndex;
+            return;
           }
         }
+      } else {
+        seqIndexRef.current++;
+        if (seqIndexRef.current >= toneLen) {
+          seqIndexRef.current = 0;
+          loopCountRef.current++;
+          if (
+            Number(currentProps.loopCount) > 0 &&
+            loopCountRef.current >= Number(currentProps.loopCount)
+          ) {
+            setPaused(true);
+            return;
+          }
+        }
+      }
 
-        return isLast ? initIndex : prev + 1;
-      });
+      // 5. Execute Playback
+      if (currentProps.referenceNoteEnabled && currentProps.referenceNote) {
+        if (isCancelled) return;
+        await playTone(currentProps.referenceNote, currentProps.toneDuration);
+
+        if (isCancelled) return;
+        await new Promise((r) => {
+          refWaitTimer = setTimeout(r, currentProps.toneWait);
+        });
+      }
+
+      if (isCancelled) return;
+      await playTone(tone, currentProps.toneDuration);
+
+      if (isCancelled) return;
+      if (currentProps.ttsEnable) {
+        // Use a slight delay to separate note sound from speech
+        ttsTimer = setTimeout(() => {
+          if (!isCancelled) sayTone(tone);
+        }, currentProps.toneWait || 200);
+      }
     };
 
     runStep();
     const timer = setInterval(runStep, totalWaitTime);
 
     return () => {
+      isCancelled = true;
       clearInterval(timer);
+      if (ttsTimer) clearTimeout(ttsTimer);
+      if (refWaitTimer) clearTimeout(refWaitTimer);
+      // Stop any currently playing sound immediately
+      if (tonePlayer !== null) {
+        tonePlayer.triggerRelease(Tone.now());
+      }
     };
-  }, [paused, props]); // Added props to dependency array as it's used inside useEffect
+  }, [paused, props.open, totalWaitTime]);
 
   useEffect(() => {
     console.info('open 1 ', props);
     if (props.open) {
       console.info('open 2 ');
-      setNextIndex(initIndex);
+      // Reset logic state
+      seqIndexRef.current = 0;
+      loopCountRef.current = 0;
+      setCurrentTone('...');
+
       setLoading(true);
       console.info(`open 3 load instrumentName ${props.instrumentName}`);
       loadInstrument(props.instrumentName)
@@ -165,10 +229,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         loading={loading}
         title={loading ? '加载音色中' : '训练'}
       >
-        <div>{JSON.stringify(props)}</div>
         <Result
           className={styles.trainPlayInfo}
-          title={props.toneList ? props?.toneList[nextIndex - 1] : '没有任何音'}
+          title={<div className="text-2xl sm:text-4xl">{currentTone}</div>}
           subTitle="当前的音是"
           icon={<SoundOutlined />}
         />

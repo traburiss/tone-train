@@ -21,7 +21,9 @@ export default defineConfig({
     },
   ],
 
-  npmClient: "pnpm",
+  npmClient: 'pnpm',
   esbuildMinifyIIFE: true,
   tailwindcss: {},
+  publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
+  history: { type: 'hash' },
 });

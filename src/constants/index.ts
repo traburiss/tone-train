@@ -48,10 +48,12 @@ export const DEFAULT_TONE_LIST = [3, 4, 5].flatMap((oct) =>
 );
 
 export const LOOP_COUNT_OPTIONS = [
-  { label: '无限循环', value: 0 },
-  { label: '10次', value: 10 },
-  { label: '20次', value: 20 },
-  { label: '50次', value: 50 },
+  { label: '无限', value: '0' },
+  { label: '10次', value: '10' },
+  { label: '20次', value: '20' },
+  { label: '50次', value: '50' },
+  { label: '200次', value: '200' },
+  { label: '手动输入', value: 'custom' },
 ];
 
 export const DEFAULT_TTS_ENABLE = true;
@@ -79,6 +81,19 @@ export declare type TrainPlayerArgs = {
   referenceNoteEnabled: boolean;
   referenceNote: string;
 };
+
+export const REFERENCE_NOTE_OPTIONS = [
+  { label: 'C2', value: 'C2' },
+  { label: 'C3', value: 'C3' },
+  { label: 'C4', value: 'C4' },
+  { label: 'C5', value: 'C5' },
+  { label: 'C6', value: 'C6' },
+  { label: 'G2', value: 'G2' },
+  { label: 'G3', value: 'G3' },
+  { label: 'G4', value: 'G4' },
+  { label: 'G5', value: 'G5' },
+  { label: 'G6', value: 'G6' },
+];
 
 export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
   toneType: DEFAULT_TONE_TYPE,
