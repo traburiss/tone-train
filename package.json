@@ -1,5 +1,6 @@
 {
   "private": true,
+  "homepage": "https://traburiss.github.io/tone-train/",
   "author": "traburiss <marlycool@qq.com>",
   "scripts": {
     "build": "max build",
