@@ -49,7 +49,6 @@ export const DEFAULT_TONE_LIST = [3, 4, 5].flatMap((oct) =>
 
 export const LOOP_COUNT_OPTIONS = [
   { label: '无限', value: '0' },
-  { label: '10次', value: '10' },
   { label: '20次', value: '20' },
   { label: '50次', value: '50' },
   { label: '200次', value: '200' },
@@ -61,10 +60,30 @@ export const DEFAULT_TTS_ENABLE = true;
 export const MIX_DURATION = 100;
 export const MAX_DURATION = 10 * 1000;
 export const DURATION_STEP = 100;
-export const DURATION_FORMATTER: Formatter = (value: any) => `${value} 毫秒`;
+export const DURATION_FORMATTER: Formatter = (value: any) => {
+  const ms = Number(value);
+  if (isNaN(ms)) return `${value}`;
+
+  const seconds = Math.floor(ms / 1000);
+  let timeStr = '';
+
+  if (seconds < 60) {
+    timeStr = `${seconds}秒`;
+  } else {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    timeStr = `${minutes}分`;
+    if (remainingSeconds > 0) {
+      timeStr += `${remainingSeconds}秒`;
+    }
+  }
+
+  return `${ms} 毫秒 (${timeStr})`;
+};
 export const DEFAULT_TONE_DURATION = 1000;
 export const DEFAULT_TONE_WAIT = 1500;
-export const DEFAULT_TTS_WAIT = 1500;
+export const DEFAULT_TTS_WAIT = 2000;
+export const DEFAULT_TTS_RATE = 1;
 
 export const DEFAULT_RANDOM = true;
 
@@ -76,6 +95,7 @@ export declare type TrainPlayerArgs = {
   toneWait: number; // ms,
   ttsEnable: boolean;
   ttsWait: number;
+  ttsRate: number; // 0.1 ~ 10
   random: boolean;
   loopCount: number;
   referenceNoteEnabled: boolean;
@@ -103,6 +123,7 @@ export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
   toneWait: DEFAULT_TONE_WAIT,
   ttsEnable: DEFAULT_TTS_ENABLE,
   ttsWait: DEFAULT_TTS_WAIT,
+  ttsRate: DEFAULT_TTS_RATE,
   random: DEFAULT_RANDOM,
   loopCount: 0,
   referenceNoteEnabled: false,

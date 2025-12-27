@@ -27,6 +27,11 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
 
   const sayTone = (tone: string) => {
     const utterance = new SpeechSynthesisUtterance(tone);
+    // User requested "operation reversed" (larger value = slower)
+    // So we treat ttsRate as "Slowness Factor" or "Duration Multiplier"
+    // Rate = 1 / Factor.
+    const factor = props.ttsRate || 1;
+    utterance.rate = 1 / factor;
     window.speechSynthesis.speak(utterance);
   };
 
