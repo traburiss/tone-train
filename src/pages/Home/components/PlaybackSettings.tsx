@@ -9,7 +9,7 @@ import {
   ProFormDependency,
   ProFormSlider,
 } from '@ant-design/pro-components';
-import { Card } from 'antd';
+import { Card, Tooltip } from 'antd';
 import React from 'react';
 
 const PlaybackSettings: React.FC = () => {
@@ -48,7 +48,7 @@ const PlaybackSettings: React.FC = () => {
             ttsEnable && (
               <ProFormSlider
                 name="ttsRate"
-                label="报音阶语速 (倍数越大越慢)"
+                label={<Tooltip title="倍数越大越慢">报音阶语速</Tooltip>}
                 width="md"
                 min={0.5}
                 max={4.0}

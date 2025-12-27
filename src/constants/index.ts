@@ -108,11 +108,6 @@ export const REFERENCE_NOTE_OPTIONS = [
   { label: 'C4', value: 'C4' },
   { label: 'C5', value: 'C5' },
   { label: 'C6', value: 'C6' },
-  { label: 'G2', value: 'G2' },
-  { label: 'G3', value: 'G3' },
-  { label: 'G4', value: 'G4' },
-  { label: 'G5', value: 'G5' },
-  { label: 'G6', value: 'G6' },
 ];
 
 export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
