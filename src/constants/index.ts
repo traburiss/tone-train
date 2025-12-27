@@ -56,6 +56,10 @@ export const LOOP_COUNT_OPTIONS = [
 ];
 
 export const DEFAULT_TTS_ENABLE = true;
+export const DEFAULT_TTS_SOLFEGE = false;
+export const DEFAULT_TTS_SOLFEGE_WAIT = 1500;
+export const DEFAULT_TTS_NOTATION = false;
+export const DEFAULT_TTS_NOTATION_WAIT = 1500;
 
 export const MIX_DURATION = 100;
 export const MAX_DURATION = 10 * 1000;
@@ -96,6 +100,10 @@ export declare type TrainPlayerArgs = {
   ttsEnable: boolean;
   ttsWait: number;
   ttsRate: number; // 0.1 ~ 10
+  ttsSolfege: boolean;
+  ttsSolfegeWait: number;
+  ttsNotation: boolean;
+  ttsNotationWait: number;
   random: boolean;
   loopCount: number;
   referenceNoteEnabled: boolean;
@@ -119,6 +127,10 @@ export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
   ttsEnable: DEFAULT_TTS_ENABLE,
   ttsWait: DEFAULT_TTS_WAIT,
   ttsRate: DEFAULT_TTS_RATE,
+  ttsSolfege: DEFAULT_TTS_SOLFEGE,
+  ttsSolfegeWait: DEFAULT_TTS_SOLFEGE_WAIT,
+  ttsNotation: DEFAULT_TTS_NOTATION,
+  ttsNotationWait: DEFAULT_TTS_NOTATION_WAIT,
   random: DEFAULT_RANDOM,
   loopCount: 0,
   referenceNoteEnabled: false,

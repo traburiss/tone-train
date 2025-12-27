@@ -1,4 +1,5 @@
 import { TrainPlayerArgs } from '@/constants';
+import { getNoteDetails } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
@@ -25,8 +26,8 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   // Ref to track loop count
   const loopCountRef = React.useRef(0);
 
-  const sayTone = (tone: string) => {
-    const utterance = new SpeechSynthesisUtterance(tone);
+  const say = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
     // User requested "operation reversed" (larger value = slower)
     // So we treat ttsRate as "Slowness Factor" or "Duration Multiplier"
     // Rate = 1 / Factor.
@@ -56,12 +57,30 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       (props.referenceNoteEnabled
         ? (props.toneDuration || 0) + (props.toneWait || 0)
         : 0);
-    return Math.max(base, 500); // Minimum 500ms safety
+
+    let ttsExtra = 0;
+    if (props.ttsEnable) {
+      // Estimate 1s per speech utterance to be safe + configured waits
+      ttsExtra += 1000;
+      if (props.ttsSolfege) {
+        ttsExtra += (props.ttsSolfegeWait || 0) + 1000;
+      }
+      if (props.ttsNotation) {
+        ttsExtra += (props.ttsNotationWait || 0) + 1000;
+      }
+    }
+
+    return Math.max(base + ttsExtra, 500); // Minimum 500ms safety
   }, [
     props.toneDuration,
     props.toneWait,
     props.ttsWait,
     props.referenceNoteEnabled,
+    props.ttsEnable,
+    props.ttsSolfege,
+    props.ttsSolfegeWait,
+    props.ttsNotation,
+    props.ttsNotationWait,
   ]);
 
   useEffect(() => {
@@ -143,11 +162,43 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       await playTone(tone, currentProps.toneDuration);
 
       if (isCancelled) return;
+      if (isCancelled) return;
       if (currentProps.ttsEnable) {
-        // Use a slight delay to separate note sound from speech
-        ttsTimer = setTimeout(() => {
-          if (!isCancelled) sayTone(tone);
-        }, currentProps.toneWait || 200);
+        // Sequential TTS logic
+        // 1. Wait toneWait (gap between sound and first speech)
+        await new Promise((r) => {
+          ttsTimer = setTimeout(r, currentProps.toneWait || 200);
+        });
+        if (isCancelled) return;
+
+        // 2. Speak Tone Name
+        say(tone);
+
+        // 3. Solfege
+        if (currentProps.ttsSolfege) {
+          await new Promise((r) => {
+            ttsTimer = setTimeout(r, currentProps.ttsSolfegeWait || 500);
+          });
+          if (isCancelled) return;
+          const { solfege } = getNoteDetails(tone);
+          if (solfege) {
+            say(solfege);
+            setCurrentTone((prev) => `${prev} ${solfege}`);
+          }
+        }
+
+        // 4. Notation
+        if (currentProps.ttsNotation) {
+          await new Promise((r) => {
+            ttsTimer = setTimeout(r, currentProps.ttsNotationWait || 500);
+          });
+          if (isCancelled) return;
+          const { number } = getNoteDetails(tone);
+          if (number) {
+            say(number);
+            setCurrentTone((prev) => `${prev} ${number}`);
+          }
+        }
       }
     };
 
