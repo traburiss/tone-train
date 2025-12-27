@@ -12,7 +12,7 @@ export default defineConfig({
     menuRender: false,
     siderWidth: 0,
   },
-  favicons: ['logo.png'],
+  favicons: ['logo.svg'],
   routes: [
     {
       name: '欢迎使用音阶训练',

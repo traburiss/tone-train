@@ -8,7 +8,7 @@ export async function getInitialState(): Promise<{ name: string }> {
 
 export const layout = () => {
   return {
-    logo: 'logo.png',
+    logo: 'logo.svg',
     title: '听音训练',
     menu: {
       locale: false,
