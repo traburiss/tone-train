@@ -28,8 +28,13 @@ export default defineConfig({
         },
       ],
     },
+    {
+      name: '系统设置',
+      path: '/settings',
+      icon: 'setting',
+      component: './Settings',
+    },
   ],
-
   npmClient: 'pnpm',
   esbuildMinifyIIFE: true,
   tailwindcss: {},

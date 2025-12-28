@@ -10,6 +10,7 @@ import BasicSettings from '@/pages/Instrument/ToneTraining/components/BasicSetti
 import PlaybackSettings from '@/pages/Instrument/ToneTraining/components/PlaybackSettings';
 import ScaleSettings from '@/pages/Instrument/ToneTraining/components/ScaleSettings';
 import TrainPlayer from '@/pages/Instrument/ToneTraining/components/trainPlayer';
+import { getPageSettings, setPageSettings } from '@/utils/storage';
 import { loadInstrument } from '@/utils/toneInstruments';
 import {
   FooterToolbar,
@@ -19,7 +20,7 @@ import {
 
 import React, { useEffect, useState } from 'react';
 
-const SETTINGS_KEY = 'music-teaching-assistant-settings';
+const STORAGE_KEY = 'tones:training';
 
 const HomePage: React.FC = () => {
   const [tonePlayerArgs, setTonePlayerArgs] = useState<TrainPlayerArgs>(
@@ -75,10 +76,10 @@ const HomePage: React.FC = () => {
 
   // Persistence logic
   useEffect(() => {
-    const saved = localStorage.getItem(SETTINGS_KEY);
+    const saved = getPageSettings<any>(STORAGE_KEY, null);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = saved;
         // Migrate old flat toneList if exists
         if (parsed.toneList && !parsed.toneListGroup) {
           parsed.toneListGroup = groupTones(parsed.toneList);
@@ -118,7 +119,7 @@ const HomePage: React.FC = () => {
   }, [form]);
 
   const onValuesChange = (_: any, allValues: any) => {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(allValues));
+    setPageSettings(STORAGE_KEY, allValues, '听音训练配置');
   };
 
   const formCommit = (v: any) => {

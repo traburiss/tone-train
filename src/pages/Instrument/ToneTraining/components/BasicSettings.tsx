@@ -23,7 +23,7 @@ const BasicSettings: React.FC = () => {
           label="音色选择"
           tooltip="用户可以选择自己习惯的音色来听音名播放"
           radioType="button"
-          fieldProps={{ buttonStyle: 'solid' }}
+          fieldProps={{ buttonStyle: 'solid', size: 'small' }}
           options={INSTRUMENT_NAME_OPTIONS}
         />
       </ProForm.Group>
@@ -34,7 +34,7 @@ const BasicSettings: React.FC = () => {
           label="循环次数"
           tooltip="用户可以选择循环次数，或者自定义循环次数"
           radioType="button"
-          fieldProps={{ buttonStyle: 'solid' }}
+          fieldProps={{ buttonStyle: 'solid', size: 'small' }}
           options={LOOP_COUNT_OPTIONS}
         />
         <ProFormDependency name={['loopCountType']}>
