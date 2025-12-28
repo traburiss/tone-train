@@ -15,7 +15,7 @@ export default defineConfig({
   favicons: ['logo.svg'],
   routes: [
     {
-      name: '欢迎使用音阶训练',
+      name: '欢迎使用听音训练',
       path: '/',
       component: './Home',
     },

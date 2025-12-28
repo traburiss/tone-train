@@ -2,11 +2,12 @@ import { Formatter } from 'antd/es/slider';
 
 export const DEFAULT_NAME = 'Umi Max';
 
-export type ToneType = '12Tone' | '8Tone';
+export type ToneType = '12Tone' | '8Tone' | 'GuitarChords';
 export const DEFAULT_TONE_TYPE = '12Tone';
 export const TONE_TYPE_OPTIONS = [
   { label: '十二音阶', value: '12Tone' },
   { label: '八度音阶', value: '8Tone' },
+  { label: '吉他和弦', value: 'GuitarChords' },
 ];
 
 export type InstrumentName = 'guitar-acoustic' | 'guitar-electric' | 'piano';
@@ -41,6 +42,66 @@ export const TONE_LIST_8 = OCTAVES.flatMap((oct) =>
 export const TONE_LIST_12 = OCTAVES.flatMap((oct) =>
   CHROMATIC_SCALE.map((note) => `${note}${oct}`),
 );
+
+export const TONE_LIST_CHORDS = [
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'A',
+  'B',
+  'Em',
+  'Am',
+  'Dm',
+  'Bm',
+  'F#m',
+  'C#m',
+  'Gm',
+  'C5',
+  'D5',
+  'E5',
+  'F5',
+  'G5',
+  'A5',
+  'B5',
+  // 7
+  'G7',
+  'C7',
+  'D7',
+  'E7',
+  'A7',
+  'B7',
+  // maj7
+  'Cmaj7',
+  'Gmaj7',
+  'Fmaj7',
+  'Amaj7',
+  // m7
+  'Am7',
+  'Em7',
+  'Dm7',
+  'Bm7',
+  'F#m7',
+  // sus
+  'Dsus4',
+  'Asus4',
+  'Esus4',
+  // slash
+  'D/F#',
+  'C/G',
+  'G/B',
+];
+
+export const DEFAULT_GUITAR_CHORDS = [
+  'C',
+  'D',
+  'G',
+  'A',
+  'Em',
+  'Am',
+  'Dm'
+];
 
 // Default select octaves 3, 4, 5
 export const DEFAULT_TONE_LIST = [3, 4, 5].flatMap((oct) =>

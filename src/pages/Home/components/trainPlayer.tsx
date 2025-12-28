@@ -1,10 +1,11 @@
 import { TrainPlayerArgs } from '@/constants';
-import { getChordNotes, getNoteDetails } from '@/utils/musicTheory';
+import { CHORD_FINGERINGS, getChordNotes, getNoteDetails } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
+import ChordDiagram from './ChordDiagram';
 import styles from './trainPlayer.less';
 
 const { confirm } = Modal;
@@ -293,7 +294,20 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
           className={styles.trainPlayInfo}
           title={<div className="text-2xl sm:text-4xl">{currentTone}</div>}
           subTitle="当前的音是"
-          icon={<SoundOutlined />}
+          icon={
+            CHORD_FINGERINGS[currentTone] ? (
+              <div className="flex justify-center">
+                <ChordDiagram
+                  name={currentTone}
+                  fingering={CHORD_FINGERINGS[currentTone]}
+                  width={100}
+                  height={140}
+                />
+              </div>
+            ) : (
+              <SoundOutlined />
+            )
+          }
         />
       </Modal>
     </>
