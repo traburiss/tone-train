@@ -1,6 +1,6 @@
 {
   "private": true,
-  "homepage": "https://traburiss.github.io/tone-train/",
+  "homepage": "https://traburiss.github.io/music-teaching-assistant/",
   "author": "traburiss <marlycool@qq.com>",
   "scripts": {
     "build": "max build",

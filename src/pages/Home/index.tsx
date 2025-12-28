@@ -36,7 +36,7 @@ const InstrumentStatusTag: React.FC<{ name: string }> = ({ name }) => {
   return null;
 };
 
-const SETTINGS_KEY = 'tone-train-settings';
+const SETTINGS_KEY = 'music-teaching-assistant-settings';
 
 const HomePage: React.FC = () => {
   const [tonePlayerArgs, setTonePlayerArgs] = useState<TrainPlayerArgs>(
