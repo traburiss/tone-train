@@ -1,7 +1,5 @@
 import * as Tone from 'tone';
 
-const toneCache: Record<string, Tone.Sampler> = {};
-
 const toneSamplerMap: Record<string, Record<string, string>> = {
   'bass-electric': {
     'A#1': 'As1.ogg',
@@ -503,24 +501,71 @@ const toneSamplerMap: Record<string, Record<string, string>> = {
     C7: 'C7.ogg',
   },
 };
+const toneCache: Record<string, Promise<Tone.Sampler>> = {};
+export type LoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
+const toneStatus: Record<string, LoadingStatus> = {};
+const statusListeners: Set<(name: string, status: LoadingStatus) => void> =
+  new Set();
 
-export const loadInstrument = async (instrumentsName: string) => {
+const notifyStatus = (name: string, status: LoadingStatus) => {
+  toneStatus[name] = status;
+  statusListeners.forEach((listener) => listener(name, status));
+};
+
+export const getInstrumentStatus = (name: string): LoadingStatus => {
+  return toneStatus[name] || 'idle';
+};
+
+export const subscribeToStatus = (
+  listener: (name: string, status: LoadingStatus) => void,
+) => {
+  statusListeners.add(listener);
+  return () => {
+    statusListeners.delete(listener);
+  };
+};
+
+export const loadInstrument = (
+  instrumentsName: string,
+): Promise<Tone.Sampler> => {
   const samplerMap = toneSamplerMap[instrumentsName];
   if (samplerMap === undefined || samplerMap === null) {
     throw new Error(`no such instruments: ${instrumentsName}`);
   }
 
-  const sampleCache = toneCache[instrumentsName];
-  if (sampleCache !== undefined && sampleCache !== null) {
-    return sampleCache;
+  const cachedPromise = toneCache[instrumentsName];
+  if (cachedPromise !== undefined && cachedPromise !== null) {
+    return cachedPromise;
   }
 
-  const sampler = new Tone.Sampler({
-    urls: samplerMap,
-    release: 1,
-    baseUrl: `samples/${instrumentsName}/`,
-  }).toDestination();
-  await Tone.loaded();
-  toneCache[instrumentsName] = sampler;
-  return sampler;
+  notifyStatus(instrumentsName, 'loading');
+
+  const promise = new Promise<Tone.Sampler>((resolve, reject) => {
+    const sampler = new Tone.Sampler({
+      urls: samplerMap,
+      release: 1,
+      baseUrl: `samples/${instrumentsName}/`,
+      onload: () => {
+        notifyStatus(instrumentsName, 'loaded');
+        resolve(sampler);
+      },
+      onerror: (e) => {
+        notifyStatus(instrumentsName, 'error');
+        // Tone.js sampler onError might not pass the error object effectively in all versions,
+        // but we reject the promise anyway.
+        reject(e);
+      },
+    }).toDestination();
+  });
+
+  toneCache[instrumentsName] = promise;
+  // Handle promise rejection for the cache?
+  // If it fails, we might want to allow retrying.
+  // But for simple cache, we keep the failed promise.
+  // Maybe better to remove from cache on error so it can be retried?
+  promise.catch(() => {
+    delete toneCache[instrumentsName];
+  });
+
+  return promise;
 };

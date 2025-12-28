@@ -1,6 +1,7 @@
 import { TrainPlayerArgs } from '@/constants';
 import { CHORD_FINGERINGS, getChordNotes, getNoteDetails } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
+import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -14,13 +15,13 @@ export declare type TrainPlayerProps = TrainPlayerArgs & {
   open: boolean;
   onCancel: () => void;
 };
-let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | null = null;
+let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | Tone.PolySynth | null = null;
 
 const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const [currentTone, setCurrentTone] = useState<string>('...');
-  const [api, contextHolder] = notification.useNotification();
+  const [, contextHolder] = notification.useNotification();
 
   // Ref to track the sequential index (0 to length-1) across intervals
   const seqIndexRef = React.useRef(0);
@@ -38,6 +39,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   };
 
   const playTone = async (tone: string, duration: number) => {
+    // Show hint if playing via MIDI (not fully loaded)
+    // Removed toast message as per user request to show next to tone name
+
     if (tonePlayer !== null) {
       const chordNotes = getChordNotes(tone);
       if (chordNotes.length > 0) {
@@ -233,23 +237,22 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       loopCountRef.current = 0;
       setCurrentTone('...');
 
-      setLoading(true);
+      // Optimistic UI: Start with Synth immediately
+      setLoading(false);
+      if (!tonePlayer) {
+        tonePlayer = new Tone.PolySynth(Tone.Synth).toDestination();
+      }
+
       loadInstrument(props.instrumentName)
         .then((sample: Tone.Sampler) => {
           tonePlayer = sample;
         })
         .catch((e) => {
-          console.error('加载音色错误，只能播放MIDI音', e);
-          api['error']({
-            message: '异常',
-            description: '无法加载音色，只能播放MIDI音',
-          });
-          tonePlayer = new Tone.Synth().toDestination();
-        })
-        .finally(() => {
-          setLoading(false);
-          setPaused(false);
+          console.error('加载音色错误，降级使用Synth', e);
+          // notification.error({ message: '音色加载失败，使用合成音替代' });
+          // Keep using the PolySynth initialized above
         });
+        setPaused(false);
     }
   }, [props.open]);
 
@@ -274,6 +277,28 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     });
   };
 
+  const status = useInstrumentStatus(props.instrumentName);
+
+  const getSubTitle = () => {
+    if (status === 'loading') {
+      return (
+        <>
+          <div>
+            当前的音是
+          </div>
+          <div className="text-yellow-600 text-sm">
+            后台正在加载音色, 暂时使用MIDI音...
+          </div>
+        </>
+      );
+    }
+    // Updated: Return default string (null or simple) when loaded, to be hidden visually or just standard text
+    if (status === 'loaded') {
+      return '当前的音是';
+    }
+    return '当前的音是';
+  };
+
   return (
     <>
       {contextHolder}
@@ -292,8 +317,12 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       >
         <Result
           className={styles.trainPlayInfo}
-          title={<div className="text-2xl sm:text-4xl">{currentTone}</div>}
-          subTitle="当前的音是"
+          title={getSubTitle()}
+          subTitle={
+            <div className="text-2xl sm:text-4xl flex items-center justify-center gap-2">
+              {currentTone}
+            </div>
+          }
           icon={
             CHORD_FINGERINGS[currentTone] ? (
               <div className="flex justify-center">

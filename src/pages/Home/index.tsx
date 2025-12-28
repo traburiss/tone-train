@@ -1,4 +1,5 @@
 import {
+  DEFAULT_INSTRUMENT_NAME,
   DEFAULT_TRAIN_PLAYER_ARGS,
   OCTAVES,
   TrainPlayerArgs,
@@ -7,12 +8,33 @@ import BasicSettings from '@/pages/Home/components/BasicSettings';
 import PlaybackSettings from '@/pages/Home/components/PlaybackSettings';
 import ScaleSettings from '@/pages/Home/components/ScaleSettings';
 import TrainPlayer from '@/pages/Home/components/trainPlayer';
+import { loadInstrument } from '@/utils/toneInstruments';
 import {
   FooterToolbar,
   PageContainer,
   ProForm,
 } from '@ant-design/pro-components';
 import React, { useEffect, useState } from 'react';
+
+import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
+import { LoadingOutlined } from '@ant-design/icons';
+import { Tag } from 'antd';
+
+const InstrumentStatusTag: React.FC<{ name: string }> = ({ name }) => {
+  const status = useInstrumentStatus(name);
+
+  if (status === 'loading') {
+    return (
+      <Tag icon={<LoadingOutlined />} color="processing">
+        加载音色中...
+      </Tag>
+    );
+  }
+  if (status === 'error') {
+    return <Tag color="error">{name} 加载失败</Tag>;
+  }
+  return null;
+};
 
 const SETTINGS_KEY = 'tone-train-settings';
 
@@ -22,6 +44,16 @@ const HomePage: React.FC = () => {
   );
   const [tonePlayerOpen, setTonePlayerOpen] = useState<boolean>(false);
   const [form] = ProForm.useForm();
+
+  // Watch instrument name for status display
+  // Use correct default constant as fallback
+  const instrumentName =
+    ProForm.useWatch('instrumentName', form) || DEFAULT_INSTRUMENT_NAME;
+
+  useEffect(() => {
+    // Immediately load the selected instrument whenever it changes or on mount
+    loadInstrument(instrumentName).catch(console.error);
+  }, [instrumentName]);
 
   // Helper to transform grouped selection back to flat toneList
   const flattenGroupedTones = (groups: Record<number, string[]>) => {
@@ -59,6 +91,11 @@ const HomePage: React.FC = () => {
           loopCountType,
           loopCountCustom: loopCountType === 'custom' ? loopCountCustom : 10,
         });
+
+        // Trigger immediate load for the persisted instrument
+        if (parsed.instrumentName) {
+          loadInstrument(parsed.instrumentName).catch(console.error);
+        }
 
         setTonePlayerArgs({
           ...DEFAULT_TRAIN_PLAYER_ARGS,
@@ -114,7 +151,13 @@ const HomePage: React.FC = () => {
             resetText: '重置',
             submitText: '开始训练',
           },
-          render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
+          render: (_, dom) => (
+            <FooterToolbar
+              extra={<InstrumentStatusTag name={instrumentName} />}
+            >
+              {dom}
+            </FooterToolbar>
+          ),
         }}
       >
         <ScaleSettings />
