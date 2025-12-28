@@ -21,12 +21,12 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Tag } from 'antd';
 
 const InstrumentStatusTag: React.FC<{ name: string }> = ({ name }) => {
-  const status = useInstrumentStatus(name);
+  const { status, progress } = useInstrumentStatus(name);
 
   if (status === 'loading') {
     return (
       <Tag icon={<LoadingOutlined />} color="processing">
-        加载音色中...
+        加载音色中 {progress ? `(${progress.loaded}/${progress.total})` : ''}...
       </Tag>
     );
   }

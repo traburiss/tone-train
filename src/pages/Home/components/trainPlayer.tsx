@@ -1,7 +1,11 @@
 import { TrainPlayerArgs } from '@/constants';
-import { CHORD_FINGERINGS, getChordNotes, getNoteDetails } from '@/utils/musicTheory';
-import { loadInstrument } from '@/utils/toneInstruments';
 import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
+import {
+  CHORD_FINGERINGS,
+  getChordNotes,
+  getNoteDetails,
+} from '@/utils/musicTheory';
+import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -15,7 +19,11 @@ export declare type TrainPlayerProps = TrainPlayerArgs & {
   open: boolean;
   onCancel: () => void;
 };
-let tonePlayer: Tone.Synth<Tone.SynthOptions> | Tone.Sampler | Tone.PolySynth | null = null;
+let tonePlayer:
+  | Tone.Synth<Tone.SynthOptions>
+  | Tone.Sampler
+  | Tone.PolySynth
+  | null = null;
 
 const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
@@ -249,10 +257,8 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         })
         .catch((e) => {
           console.error('加载音色错误，降级使用Synth', e);
-          // notification.error({ message: '音色加载失败，使用合成音替代' });
-          // Keep using the PolySynth initialized above
         });
-        setPaused(false);
+      setPaused(false);
     }
   }, [props.open]);
 
@@ -277,17 +283,27 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     });
   };
 
-  const status = useInstrumentStatus(props.instrumentName);
+  const { status, progress } = useInstrumentStatus(props.instrumentName);
 
-  const getSubTitle = () => {
+  const getHintTitle = () => {
     if (status === 'loading') {
       return (
         <>
-          <div>
-            当前的音是
-          </div>
+          <div>当前的音是</div>
           <div className="text-yellow-600 text-sm">
-            后台正在加载音色, 暂时使用MIDI音...
+            后台正在加载音色{' '}
+            {progress ? `(${progress.loaded}/${progress.total})` : ''},
+            暂时使用MIDI音...
+          </div>
+        </>
+      );
+    }
+    if (status === 'error') {
+      return (
+        <>
+          <div>当前的音是</div>
+          <div className="text-red-600 text-sm">
+            音色文件缺失或加载失败, 使用MIDI音
           </div>
         </>
       );
@@ -317,7 +333,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       >
         <Result
           className={styles.trainPlayInfo}
-          title={getSubTitle()}
+          title={getHintTitle()}
           subTitle={
             <div className="text-2xl sm:text-4xl flex items-center justify-center gap-2">
               {currentTone}

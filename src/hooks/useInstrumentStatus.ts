@@ -1,22 +1,38 @@
 import { useEffect, useState } from 'react';
 import {
+  getInstrumentProgress,
   getInstrumentStatus,
+  LoadingProgress,
   LoadingStatus,
   subscribeToStatus,
 } from '../utils/toneInstruments';
 
-export const useInstrumentStatus = (instrumentName: string): LoadingStatus => {
-  const [status, setStatus] = useState<LoadingStatus>(() =>
-    getInstrumentStatus(instrumentName),
-  );
+export type InstrumentStatusState = {
+  status: LoadingStatus;
+  progress?: LoadingProgress;
+};
+
+export const useInstrumentStatus = (
+  instrumentName: string,
+): InstrumentStatusState => {
+  const [state, setState] = useState<InstrumentStatusState>(() => ({
+    status: getInstrumentStatus(instrumentName),
+    progress: getInstrumentProgress(instrumentName),
+  }));
 
   useEffect(() => {
     // Current status might have changed since initial render
-    setStatus(getInstrumentStatus(instrumentName));
+    setState({
+      status: getInstrumentStatus(instrumentName),
+      progress: getInstrumentProgress(instrumentName),
+    });
 
-    const unsubscribe = subscribeToStatus((name, newStatus) => {
+    const unsubscribe = subscribeToStatus((name, newStatus, newProgress) => {
       if (name === instrumentName) {
-        setStatus(newStatus);
+        setState({
+          status: newStatus,
+          progress: newProgress,
+        });
       }
     });
 
@@ -25,5 +41,5 @@ export const useInstrumentStatus = (instrumentName: string): LoadingStatus => {
     };
   }, [instrumentName]);
 
-  return status;
+  return state;
 };
