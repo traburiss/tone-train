@@ -7,17 +7,26 @@ export default defineConfig({
   initialState: {},
   request: {},
   layout: {
-    title: '听音训练',
+    title: '音乐助教',
     layout: 'top',
-    menuRender: false,
     siderWidth: 0,
   },
   favicons: ['logo.svg'],
   routes: [
     {
-      name: '欢迎使用听音训练',
+      name: '首页',
       path: '/',
       component: './Home',
+    },
+    {
+      name: '器乐训练',
+      routes: [
+        {
+          name: '听音训练',
+          path: '/instrument/tone-training',
+          component: './Instrument/ToneTraining',
+        },
+      ],
     },
   ],
 

@@ -1,3 +1,4 @@
+import ChordDiagram from '@/components/ChordDiagram';
 import { TrainPlayerArgs } from '@/constants';
 import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
 import {
@@ -10,7 +11,6 @@ import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
-import ChordDiagram from './ChordDiagram';
 import styles from './trainPlayer.less';
 
 const { confirm } = Modal;
@@ -46,12 +46,21 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const propsRef = React.useRef(props);
+  propsRef.current = props;
+
   const playTone = async (tone: string, duration: number) => {
     // Show hint if playing via MIDI (not fully loaded)
     // Removed toast message as per user request to show next to tone name
 
     if (tonePlayer !== null) {
-      const chordNotes = getChordNotes(tone);
+      let chordNotes: string[] = [];
+      // Only resolve chords if explicitly in GuitarChords mode to avoid
+      // collisions with single notes (e.g., C5, D5, E5)
+      if (propsRef.current.toneType === 'GuitarChords') {
+        chordNotes = getChordNotes(tone);
+      }
+
       if (chordNotes.length > 0) {
         // Play chord
         // Use a small stagger or just play all at once?
@@ -66,9 +75,6 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       setTimeout(resolve, duration);
     });
   };
-
-  const propsRef = React.useRef(props);
-  propsRef.current = props;
 
   const totalWaitTime = React.useMemo(() => {
     const base =
@@ -283,7 +289,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     });
   };
 
-  const { status, progress } = useInstrumentStatus(props.instrumentName);
+  const { status } = useInstrumentStatus(props.instrumentName);
 
   const getHintTitle = () => {
     if (status === 'loading') {
@@ -291,9 +297,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         <>
           <div>当前的音是</div>
           <div className="text-yellow-600 text-sm">
-            后台正在加载音色{' '}
-            {progress ? `(${progress.loaded}/${progress.total})` : ''},
-            暂时使用MIDI音...
+            音色加载中, 暂时使用MIDI音...
           </div>
         </>
       );
@@ -302,15 +306,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       return (
         <>
           <div>当前的音是</div>
-          <div className="text-red-600 text-sm">
-            音色文件缺失或加载失败, 使用MIDI音
-          </div>
+          <div className="text-red-600 text-sm">音色加载失败, 使用MIDI音</div>
         </>
       );
-    }
-    // Updated: Return default string (null or simple) when loaded, to be hidden visually or just standard text
-    if (status === 'loaded') {
-      return '当前的音是';
     }
     return '当前的音是';
   };

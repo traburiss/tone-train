@@ -2,12 +2,12 @@ import { Formatter } from 'antd/es/slider';
 
 export const DEFAULT_NAME = 'Umi Max';
 
-export type ToneType = '12Tone' | '8Tone' | 'GuitarChords';
-export const DEFAULT_TONE_TYPE = '12Tone';
+export type ToneType = 'GuitarChords' | '12Tone' | '8Tone';
+export const DEFAULT_TONE_TYPE = 'GuitarChords';
 export const TONE_TYPE_OPTIONS = [
+  { label: '吉他和弦', value: 'GuitarChords' },
   { label: '十二音阶', value: '12Tone' },
   { label: '八度音阶', value: '8Tone' },
-  { label: '吉他和弦', value: 'GuitarChords' },
 ];
 
 export type InstrumentName = 'guitar-acoustic' | 'guitar-electric' | 'piano';
@@ -93,20 +93,10 @@ export const TONE_LIST_CHORDS = [
   'G/B',
 ];
 
-export const DEFAULT_GUITAR_CHORDS = [
-  'C',
-  'D',
-  'G',
-  'A',
-  'Em',
-  'Am',
-  'Dm'
-];
+export const DEFAULT_GUITAR_CHORDS = ['C', 'D', 'G', 'A', 'Em', 'Am', 'Dm'];
 
-// Default select octaves 3, 4, 5
-export const DEFAULT_TONE_LIST = [3, 4, 5].flatMap((oct) =>
-  MAJOR_SCALE.map((note) => `${note}${oct}`),
-);
+// Default select common chords
+export const DEFAULT_TONE_LIST = ['C', 'D', 'G', 'A', 'Em', 'Am', 'Dm'];
 
 export const LOOP_COUNT_OPTIONS = [
   { label: '无限', value: '0' },

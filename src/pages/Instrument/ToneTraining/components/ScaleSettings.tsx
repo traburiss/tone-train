@@ -1,3 +1,4 @@
+import ChordSettings from '@/components/ChordSettings';
 import {
   CHROMATIC_SCALE,
   DEFAULT_GUITAR_CHORDS,
@@ -14,7 +15,6 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Card, Form, Space } from 'antd';
 import React, { useState } from 'react';
-import ChordSettings from './ChordSettings';
 import './ScaleSettings.css';
 
 const ScaleSettings: React.FC = () => {
