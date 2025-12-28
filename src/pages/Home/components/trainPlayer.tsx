@@ -1,5 +1,5 @@
 import { TrainPlayerArgs } from '@/constants';
-import { getNoteDetails } from '@/utils/musicTheory';
+import { getChordNotes, getNoteDetails } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
 import { Modal, notification, Result } from 'antd';
@@ -37,9 +37,17 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   };
 
   const playTone = async (tone: string, duration: number) => {
-    console.info('playTone', tone, duration);
     if (tonePlayer !== null) {
-      tonePlayer.triggerAttackRelease(tone, duration / 1000);
+      const chordNotes = getChordNotes(tone);
+      if (chordNotes.length > 0) {
+        // Play chord
+        // Use a small stagger or just play all at once?
+        // Trigger attack for all notes
+        (tonePlayer as any).triggerAttackRelease(chordNotes, duration / 1000);
+      } else {
+        // Single note
+        tonePlayer.triggerAttackRelease(tone, duration / 1000);
+      }
     }
     return new Promise((resolve) => {
       setTimeout(resolve, duration);
@@ -218,23 +226,19 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   }, [paused, props.open, totalWaitTime]);
 
   useEffect(() => {
-    console.info('open 1 ', props);
     if (props.open) {
-      console.info('open 2 ');
       // Reset logic state
       seqIndexRef.current = 0;
       loopCountRef.current = 0;
       setCurrentTone('...');
 
       setLoading(true);
-      console.info(`open 3 load instrumentName ${props.instrumentName}`);
       loadInstrument(props.instrumentName)
         .then((sample: Tone.Sampler) => {
-          console.info(`load instrumentName ${props.instrumentName} success`);
           tonePlayer = sample;
         })
-        .catch((e: any) => {
-          console.info(`load instrumentName ${props.instrumentName} error`, e);
+        .catch((e) => {
+          console.error('加载音色错误，只能播放MIDI音', e);
           api['error']({
             message: '异常',
             description: '无法加载音色，只能播放MIDI音',
@@ -274,7 +278,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       {contextHolder}
       <Modal
         open={props.open}
-        destroyOnClose={true}
+        destroyOnHidden={true}
         width={'80%'}
         height={'80%'}
         maskClosable={false}
