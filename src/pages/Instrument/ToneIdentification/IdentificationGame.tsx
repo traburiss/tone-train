@@ -54,7 +54,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
     if (!tonePlayer) return;
     setIsPlaying(true);
 
-    const duration = 1.5; // seconds
+    const duration = (settings.toneDuration || 1000) / 1000; // convert to seconds
     if (settings.toneType === 'GuitarChords') {
       const notes = getChordNotes(tone);
       if (notes.length > 0) {
@@ -139,7 +139,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
         setConsecutiveCorrect(0);
       }
 
-      nextQuestion();
+      setTimeout(nextQuestion, settings.toneWait || 0);
     } else {
       // Wrong
       if (!wrongOptions.includes(selected)) {
@@ -249,7 +249,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
               <Progress
                 type="circle"
                 percent={(timeLeft / settings.timeLimit) * 100}
-                width={30}
+                size={{ width: 30 }}
                 showInfo={false}
                 strokeColor={timeLeft < 10 ? '#ff4d4f' : '#1890ff'}
               />
@@ -258,7 +258,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
         </div>
       }
       maskClosable={false}
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="py-4 text-center">
         <div className="mb-8">
@@ -281,30 +281,48 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div
+          className="grid gap-2 mb-6"
+          style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
+        >
           {options.map((opt) => {
             const isWrong = wrongOptions.includes(opt);
+            const isChord = settings.toneType === 'GuitarChords';
             return (
-              <Button
+              <div
                 key={opt}
-                disabled={isWrong}
-                className={`h-24 text-lg font-bold flex flex-col items-center justify-center gap-1 ${
-                  isWrong ? 'opacity-50 border-dashed' : ''
-                }`}
-                onClick={() => handleSelect(opt)}
+                className={`
+                  flex flex-col items-center justify-center p-0.5 border rounded transition-all cursor-pointer select-none
+                  h-24 overflow-hidden
+                  ${
+                    isWrong
+                      ? 'bg-gray-50 border-gray-100 opacity-10 cursor-not-allowed'
+                      : 'bg-white border-blue-50 shadow-sm hover:border-blue-300 active:scale-95'
+                  }
+                `}
+                onClick={() => !isWrong && handleSelect(opt)}
               >
-                {opt}
+                <div
+                  className={`font-bold truncate w-full text-center leading-tight ${
+                    isChord
+                      ? 'text-[10px] text-gray-400'
+                      : 'text-sm text-gray-700'
+                  }`}
+                >
+                  {opt}
+                </div>
                 {CHORD_FINGERINGS[opt] && (
-                  <div className="scale-50 h-8 overflow-hidden flex items-center justify-center">
+                  <div className="flex items-center justify-center w-full">
                     <ChordDiagram
                       name={opt}
                       fingering={CHORD_FINGERINGS[opt]}
                       width={60}
                       height={80}
+                      showName={false}
                     />
                   </div>
                 )}
-              </Button>
+              </div>
             );
           })}
         </div>

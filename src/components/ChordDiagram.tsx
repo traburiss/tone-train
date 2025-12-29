@@ -5,6 +5,7 @@ export interface ChordDiagramProps {
   fingering: number[]; // 6 numbers: 6th string -> 1st string. -1=x, 0=open, >0=fret
   width?: number;
   height?: number;
+  showName?: boolean;
 }
 
 const ChordDiagram: React.FC<ChordDiagramProps> = ({
@@ -12,6 +13,7 @@ const ChordDiagram: React.FC<ChordDiagramProps> = ({
   fingering,
   width = 60,
   height = 80,
+  showName = true,
 }) => {
   // Config
   const numStrings = 6;
@@ -27,7 +29,7 @@ const ChordDiagram: React.FC<ChordDiagramProps> = ({
 
   return (
     <div className="flex flex-col items-center">
-      <span className="text-sm font-bold mb-1">{name}</span>
+      {showName && <span className="text-sm font-bold mb-1">{name}</span>}
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <g transform={`translate(${paddingX}, ${paddingY})`}>
           {/* Frets */}

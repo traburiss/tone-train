@@ -2,6 +2,7 @@ import ScaleSettings from '@/components/ScaleSettings';
 import {
   DEFAULT_INSTRUMENT_NAME,
   DEFAULT_TONE_TYPE,
+  DURATION_FORMATTER,
   INSTRUMENT_NAME_OPTIONS,
   TONES_IDENTIFICATION_STORAGE_KEY,
 } from '@/constants';
@@ -13,7 +14,7 @@ import {
   ProFormDependency,
   ProFormDigit,
   ProFormRadio,
-  ProFormSelect,
+  ProFormSlider,
 } from '@ant-design/pro-components';
 import { Card, message } from 'antd';
 import React, { useEffect, useState } from 'react';
@@ -29,6 +30,8 @@ export interface IdentificationSettings {
   difficulty: Difficulty;
   mode: IdentificationMode;
   timeLimit: number; // in seconds
+  toneDuration: number; // ms
+  toneWait: number; // ms
 }
 
 const DEFAULT_SETTINGS: IdentificationSettings = {
@@ -37,9 +40,11 @@ const DEFAULT_SETTINGS: IdentificationSettings = {
   toneListGroup: {
     chords: ['C', 'D', 'G', 'Em', 'Am'],
   },
-  difficulty: 4,
+  difficulty: 2,
   mode: 'timed',
   timeLimit: 60,
+  toneDuration: 1000,
+  toneWait: 1500,
 };
 
 const Practice: React.FC = () => {
@@ -117,16 +122,19 @@ const Practice: React.FC = () => {
 
         <Card title="测试配置" className="mb-6">
           <div className="flex flex-col gap-6">
-            <div className="flex flex-wrap gap-4 border-b pb-4">
-              <ProFormSelect
+            <div className="flex flex-col gap-4 border-b pb-4">
+              <ProFormRadio.Group
                 name="instrumentName"
                 label="乐器音色"
+                radioType="button"
+                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={INSTRUMENT_NAME_OPTIONS}
-                width="md"
               />
               <ProFormRadio.Group
                 name="difficulty"
                 label="问题难度"
+                radioType="button"
+                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={[
                   { label: '简单 (2选1)', value: 2 },
                   { label: '中等 (4选1)', value: 4 },
@@ -136,10 +144,37 @@ const Practice: React.FC = () => {
               />
             </div>
 
+            <div className="flex flex-wrap gap-x-8 gap-y-0 border-b pb-4">
+              <ProFormSlider
+                name="toneDuration"
+                label="音播放时长"
+                min={100}
+                max={5000}
+                step={100}
+                width="md"
+                fieldProps={{
+                  tooltip: { formatter: DURATION_FORMATTER },
+                }}
+              />
+              <ProFormSlider
+                name="toneWait"
+                label="音播放完等待时长"
+                min={100}
+                max={5000}
+                step={100}
+                width="md"
+                fieldProps={{
+                  tooltip: { formatter: DURATION_FORMATTER },
+                }}
+              />
+            </div>
+
             <div className="flex flex-wrap items-center gap-8">
               <ProFormRadio.Group
                 name="mode"
                 label="测试模式"
+                radioType="button"
+                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={[
                   { label: '限时挑战', value: 'timed' },
                   { label: '无限模式', value: 'infinite' },

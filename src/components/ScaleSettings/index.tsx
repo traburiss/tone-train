@@ -101,6 +101,7 @@ const ScaleSettings: React.FC = () => {
                 radioType="button"
                 fieldProps={{
                   size: 'small',
+                  buttonStyle: 'solid',
                   onChange: (e) => {
                     const value = e.target.value;
                     if (value === 'GuitarChords') {
