@@ -26,6 +26,11 @@ export default defineConfig({
           path: '/instrument/tone-training',
           component: './Instrument/ToneTraining',
         },
+        {
+          name: '听音判断',
+          path: '/instrument/tone-identification',
+          component: './Instrument/ToneIdentification',
+        },
       ],
     },
     {

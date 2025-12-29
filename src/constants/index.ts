@@ -187,3 +187,20 @@ export const DEFAULT_TRAIN_PLAYER_ARGS: TrainPlayerArgs = {
   referenceNoteEnabled: false,
   referenceNote: 'C4',
 };
+
+export const STORAGE_PREFIX = 'mta:cfg:';
+export const STATS_PREFIX = 'mta:sta:';
+
+export const TONES_TRAINING_STORAGE_KEY = 'tones:training';
+export const TONES_IDENTIFICATION_STORAGE_KEY = 'tones:identification';
+
+export const CONFIG_kEY_LIST = [
+  {
+    name: '听音训练',
+    key: TONES_TRAINING_STORAGE_KEY,
+  },
+  {
+    name: '听音判断',
+    key: TONES_IDENTIFICATION_STORAGE_KEY,
+  },
+];

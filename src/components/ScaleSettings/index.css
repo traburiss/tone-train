@@ -1,0 +1,90 @@
+@layer components {
+  /* Complex Ant Design overrides using Tailwind @apply */
+  .scale-card .ant-card-head {
+    @apply !px-4 sm:!px-6;
+  }
+
+  .scale-card .ant-card-body {
+    @apply !p-3 sm:!p-6;
+  }
+
+  .scale-card .ant-card-head-wrapper {
+    @apply flex-wrap gap-2;
+  }
+
+  .touch-button-group.ant-checkbox-group {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  .touch-button-group .ant-checkbox-wrapper {
+    @apply inline-flex items-center justify-center !m-0 !p-0 !min-w-[42px] !h-9 px-2 !border !border-[#d9d9d9] !rounded-md bg-white transition-all duration-200 select-none text-xs font-semibold shadow-sm;
+
+    touch-action: manipulation;
+  }
+
+  .touch-button-group .ant-checkbox-wrapper-checked {
+    @apply !border-[#1890ff] !bg-[#1890ff] !text-white !shadow-[0_2px_4px_rgba(24,144,255,0.3)];
+  }
+
+  .touch-button-group .ant-checkbox {
+    @apply absolute opacity-0 w-0 h-0 pointer-events-none;
+  }
+
+  .touch-button-group .ant-checkbox-wrapper:active {
+    @apply scale-95 opacity-80;
+  }
+
+  /* 修复 octave-row 对齐问题 - 桌面端让控制区域与第一行音符对齐 */
+  @media (min-width: 640px) {
+    .octave-row {
+      align-items: flex-start !important;
+    }
+
+    /* 为左侧控制区域添加顶部 padding，与 ant-form-item 的默认间距匹配 */
+    .octave-row > div:first-child {
+      padding-top: 5px;
+    }
+
+    /* 移除音符区域的 ant-form-item 默认底部 margin，减少下边缘空白 */
+    .octave-row .ant-form-item {
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+/* Global layout overrides for mobile compactness */
+@media (max-width: 640px) {
+  /* Reduce PageContainer default padding to absolute minimum */
+  .ant-pro-page-container-children-container {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    padding-top: 4px !important;
+  }
+
+  .ant-pro-page-container-children-content {
+    padding: 0 !important;
+  }
+
+  /* Force all cards to be more compact on mobile */
+  .ant-card {
+    margin-bottom: 8px !important;
+  }
+
+  .ant-card .ant-card-head {
+    padding: 0 10px !important;
+    min-height: 36px !important;
+  }
+
+  .ant-card .ant-card-head-title {
+    padding: 8px 0 !important;
+    font-size: 14px !important;
+  }
+
+  .ant-card .ant-card-body {
+    padding: 10px 8px !important;
+  }
+
+  .ant-card .ant-card-extra {
+    padding: 8px 0 !important;
+  }
+}

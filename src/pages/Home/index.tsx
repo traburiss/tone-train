@@ -33,6 +33,26 @@ const HomePage: React.FC = () => {
             <div className="mt-2 text-xs">支持和弦、单音等多种训练模式</div>
           </div>
         </ProCard>
+        <ProCard
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          layout="center"
+          bordered
+          hoverable
+          onClick={() => {
+            history.push('/instrument/tone-identification');
+          }}
+          title={
+            <div className="flex items-center gap-2">
+              <SoundOutlined className="text-green-500" />
+              <span>听音判断</span>
+            </div>
+          }
+        >
+          <div className="text-gray-500 text-center py-4">
+            <div>练习辨音，挑战自我</div>
+            <div className="mt-2 text-xs">支持多种难度和限时挑战模式</div>
+          </div>
+        </ProCard>
       </ProCard>
       <ProCard
         ghost

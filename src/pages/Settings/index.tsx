@@ -1,93 +1,29 @@
-import JsonEditor from '@/components/JsonEditor';
+import { CONFIG_kEY_LIST } from '@/constants';
 import {
   AppSettings,
   clearAllSettings,
+  clearAllStats,
+  clearPageSettings,
+  clearPageStats,
   getAllSettings,
+  getAllStats,
+  getPageSettings,
+  getStats,
   importAllSettings,
-  setPageSettings,
 } from '@/utils/storage';
 import {
+  BarChartOutlined,
+  CodeOutlined,
+  DatabaseOutlined,
+  DeleteOutlined,
   DownloadOutlined,
   RestOutlined,
-  SaveOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { PageContainer, ProCard, ProForm } from '@ant-design/pro-components';
-import { Button, Empty, message, Modal, Space, Upload } from 'antd';
+import { PageContainer, ProCard } from '@ant-design/pro-components';
+import { Button, Col, message, Modal, Row, Space, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
-
-const ConfigItemEditor: React.FC<{
-  storageKey: string;
-  name: string;
-  initialValue: any;
-  onSaved: () => void;
-}> = ({ storageKey, name, initialValue, onSaved }) => {
-  const [form] = ProForm.useForm();
-
-  useEffect(() => {
-    form.setFieldsValue({
-      json: JSON.stringify(initialValue, null, 2),
-    });
-  }, [initialValue]);
-
-  const handleSave = async (values: any) => {
-    Modal.confirm({
-      title: `确认保存配置吗？`,
-      content: `确认保存 ${name} (key: ${storageKey}) 的配置吗？`,
-      okText: '确认',
-      okType: 'primary',
-      onOk: () => {
-        try {
-          const parsedValue = JSON.parse(values.json);
-          // Explicitly preserve the current name while updating value
-          setPageSettings(storageKey, parsedValue, name);
-          message.success(`${name} 保存成功`);
-          onSaved();
-        } catch (err) {
-          message.error('保存失败：JSON 语法错误');
-        }
-      },
-    });
-  };
-
-  return (
-    <ProCard
-      title={<span className="font-bold text-primary">{name}</span>}
-      subTitle={
-        <code className="text-xs text-secondary opacity-60 ml-2">
-          Key: {storageKey}
-        </code>
-      }
-      className="mb-4 shadow-sm"
-      collapsible
-      defaultCollapsed
-    >
-      <ProForm
-        form={form}
-        onFinish={handleSave}
-        submitter={{
-          render: (props) => (
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={() => props.submit()}
-            >
-              保存本项修改
-            </Button>
-          ),
-        }}
-      >
-        <ProForm.Item
-          name="json"
-          label="配置值"
-          rules={[{ required: true, message: '请输入配置内容' }]}
-        >
-          <JsonEditor height="300px" />
-        </ProForm.Item>
-      </ProForm>
-    </ProCard>
-  );
-};
+import ConfigItemEditor from './components/ConfigItemEditor';
 
 const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings>({});
@@ -100,20 +36,52 @@ const SettingsPage: React.FC = () => {
     refreshData();
   }, []);
 
-  const handleExport = () => {
-    const allSettings = getAllSettings();
+  const handleExportAll = (key: string | null = null) => {
+    const combined =
+      key === null
+        ? { settings: getAllSettings(), stats: getAllStats() }
+        : { settings: getPageSettings(key, {}), stats: getStats(key, {}) };
+    const blob = new Blob([JSON.stringify(combined, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mta-all-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    message.success(key === null ? '导出全量数据成功' : `导出 ${key} 配置成功`);
+  };
+
+  const handleExportConfig = (key: string | null = null) => {
+    const allSettings =
+      key === null ? getAllSettings() : getPageSettings(key, {});
     const blob = new Blob([JSON.stringify(allSettings, null, 2)], {
       type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `mta-settings-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
+    link.download = `mta-config-only-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    message.success('导出全量配置成功');
+    message.success(key === null ? '导出配置数据成功' : `导出 ${key} 配置成功`);
+  };
+
+  const handleExportStats = (key: string | null = null) => {
+    const allStats = key === null ? getAllStats() : getStats(key, {});
+    const blob = new Blob([JSON.stringify(allStats, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mta-stats-only-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    message.success(
+      key === null ? '导出统计数据成功' : `导出 ${key} 统计数据成功`,
+    );
   };
 
   const handleImport = (file: File) => {
@@ -122,7 +90,7 @@ const SettingsPage: React.FC = () => {
       try {
         const json = JSON.parse(e.target?.result as string);
         importAllSettings(json);
-        message.success('导入配置成功');
+        message.success('导入数据成功');
         refreshData();
       } catch (err) {
         message.error('导入失败：JSON 格式不正确');
@@ -132,64 +100,247 @@ const SettingsPage: React.FC = () => {
     return false;
   };
 
-  const handleReset = () => {
+  const clearWithConfirm = (
+    title: string,
+    content: string,
+    onOk: () => void,
+  ) => {
     Modal.confirm({
-      title: '确认重置所有配置？',
-      content: '该操作将删除所有（带有 mta:cfg 前缀的）本地保存设置。',
-      okText: '确认重置',
+      title,
+      content,
+      okText: '确认清理',
       okType: 'danger',
-      onOk: () => {
-        clearAllSettings();
-        message.success('所有设置已重置');
-        refreshData();
-      },
+      onOk,
     });
   };
 
-  // Sort settings alphabetically by name
-  const sortedKeys = Object.keys(settings).sort((a, b) => {
-    const nameA = settings[a].name || '';
-    const nameB = settings[b].name || '';
-    return nameA.localeCompare(nameB, 'zh-CN');
-  });
+  const handleClearAll = (key: string | null = null) => {
+    clearWithConfirm(
+      key === null ? '确认重置所有数据？' : `确认重置 ${key} 数据？`,
+      key === null
+        ? '该操作将删除所有（带有 mta:cfg 和 mta:sta 前缀的）本地设置和统计背景。'
+        : `该操作将删除所有带有 ${key} 前缀的本地设置和统计背景。`,
+      () => {
+        if (key === null) {
+          clearAllSettings();
+          clearAllStats();
+        } else {
+          clearPageSettings(key);
+          clearPageStats(key);
+        }
+        message.success(
+          key === null
+            ? '所有设置与统计已重置'
+            : `所有 ${key} 设置与统计已重置`,
+        );
+        refreshData();
+      },
+    );
+  };
+
+  const handleClearConfig = (key: string | null = null) => {
+    clearWithConfirm(
+      key === null ? '确认清空所有配置？' : `确认清空 ${key} 配置？`,
+      key === null
+        ? '该操作仅删除带有 mta:cfg 前缀的设置，统计数据将保留。'
+        : `该操作仅删除带有 ${key} 前缀的设置，统计数据将保留。`,
+      () => {
+        if (key === null) {
+          clearAllSettings();
+        } else {
+          clearPageSettings(key);
+        }
+        message.success(
+          key === null ? '所有配置已清空' : `所有 ${key} 配置已清空`,
+        );
+        refreshData();
+      },
+    );
+  };
+
+  const handleClearStats = (key: string | null = null) => {
+    clearWithConfirm(
+      key === null ? '确认清空所有统计？' : `确认清空 ${key} 统计？`,
+      key === null
+        ? '该操作仅删除带有 mta:sta 前缀的数据，配置信息将保留。'
+        : `该操作仅删除带有 ${key} 前缀的数据，配置信息将保留。`,
+      () => {
+        if (key === null) {
+          clearAllStats();
+        } else {
+          clearPageStats(key);
+        }
+        message.success(
+          key === null ? '所有统计已清空' : `所有 ${key} 统计已清空`,
+        );
+        refreshData();
+      },
+    );
+  };
 
   return (
-    <PageContainer title="系统设置">
-      <ProCard title="全局数据操作" className="mb-6">
-        <Space size="middle" wrap>
-          <Button icon={<DownloadOutlined />} onClick={handleExport}>
-            导出全量 (JSON)
-          </Button>
+    <PageContainer title="系统设置项目管理">
+      <ProCard title="全局数据操作" gutter={[16, 16]} wrap ghost>
+        <ProCard
+          title={
+            <>
+              <DownloadOutlined /> 导出数据
+            </>
+          }
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          bordered
+          hoverable
+        >
+          <Space size="middle" align="start" wrap>
+            <Button
+              icon={<DatabaseOutlined />}
+              onClick={() => handleExportAll(null)}
+            >
+              全量导出 (配置+统计)
+            </Button>
+            <Button
+              icon={<CodeOutlined />}
+              onClick={() => handleExportConfig(null)}
+            >
+              仅导出配置 (mta:cfg)
+            </Button>
+            <Button
+              icon={<BarChartOutlined />}
+              onClick={() => handleExportStats(null)}
+            >
+              仅导出统计 (mta:sta)
+            </Button>
+          </Space>
+        </ProCard>
+        <ProCard
+          title={
+            <>
+              <UploadOutlined /> 导入数据
+            </>
+          }
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          bordered
+          hoverable
+        >
           <Upload
             beforeUpload={handleImport}
             showUploadList={false}
             accept=".json"
           >
-            <Button icon={<UploadOutlined />}>导入全量 (JSON)</Button>
+            <Button icon={<UploadOutlined />} type="primary">
+              开始导入 (JSON)
+            </Button>
           </Upload>
-          <Button icon={<RestOutlined />} danger onClick={handleReset}>
-            重置全部配置
-          </Button>
-        </Space>
+        </ProCard>
+        <ProCard
+          title={
+            <>
+              <DeleteOutlined /> 清理数据
+            </>
+          }
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          bordered
+          hoverable
+        >
+          <Space size="middle" align="start" wrap>
+            <Button
+              icon={<RestOutlined />}
+              danger
+              onClick={() => handleClearAll(null)}
+            >
+              清理全量
+            </Button>
+            <Button
+              icon={<DeleteOutlined />}
+              danger
+              onClick={() => handleClearConfig(null)}
+            >
+              清理配置
+            </Button>
+            <Button
+              icon={<BarChartOutlined />}
+              danger
+              onClick={() => handleClearStats(null)}
+            >
+              清理统计
+            </Button>
+          </Space>
+        </ProCard>
       </ProCard>
-      、
-      <ProCard title="配置项" className="mb-6">
-        {sortedKeys.length === 0 ? (
-          <Empty description="暂无已保存的分项配置" />
-        ) : (
-          sortedKeys.map((key) => {
-            const item = settings[key];
-            return (
-              <ConfigItemEditor
-                key={key}
-                storageKey={key}
-                name={item.name}
-                initialValue={item.value}
-                onSaved={refreshData}
-              />
-            );
-          })
-        )}
+
+      <ProCard title="功能项操作" gutter={[16, 16]} wrap ghost>
+        {CONFIG_kEY_LIST.map(({ key, name }) => {
+          const item = settings[key];
+          return (
+            <ProCard
+              title={name}
+              colSpan={{ xs: 24, sm: 12, md: 8 }}
+              layout="center"
+              bordered
+              hoverable
+              key={`config-cart-${key}`}
+            >
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <Space size="middle" align="start" wrap>
+                    <Button
+                      icon={<DatabaseOutlined />}
+                      onClick={() => handleExportAll(key)}
+                    >
+                      全量导出 (配置+统计)
+                    </Button>
+                    <Button
+                      icon={<CodeOutlined />}
+                      onClick={() => handleExportConfig(key)}
+                    >
+                      导出配置 (mta:cfg)
+                    </Button>
+                    <Button
+                      icon={<BarChartOutlined />}
+                      onClick={() => handleExportStats(key)}
+                    >
+                      导出统计 (mta:sta)
+                    </Button>
+                  </Space>
+                </Col>
+                <Col span={24}>
+                  <Space size="middle" wrap>
+                    <Button
+                      icon={<RestOutlined />}
+                      danger
+                      onClick={() => handleClearAll(key)}
+                    >
+                      清理全量 (配置+统计)
+                    </Button>
+                    <Button
+                      icon={<DeleteOutlined />}
+                      danger
+                      onClick={() => handleClearConfig(key)}
+                    >
+                      清理配置 (mta:cfg)
+                    </Button>
+                    <Button
+                      icon={<BarChartOutlined />}
+                      danger
+                      onClick={() => handleClearStats(key)}
+                    >
+                      清理统计 (mta:sta)
+                    </Button>
+                  </Space>
+                </Col>
+                <Col span={24}>
+                  <ConfigItemEditor
+                    key={key}
+                    storageKey={key}
+                    name={name}
+                    initialValue={item?.value ?? {}}
+                    onSaved={refreshData}
+                  />
+                </Col>
+              </Row>
+            </ProCard>
+          );
+        })}
       </ProCard>
     </PageContainer>
   );

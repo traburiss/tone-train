@@ -1,14 +1,15 @@
+import ScaleSettings from '@/components/ScaleSettings';
 import {
   DEFAULT_INSTRUMENT_NAME,
   DEFAULT_TONE_TYPE,
   DEFAULT_TRAIN_PLAYER_ARGS,
   OCTAVES,
   TONE_LIST_CHORDS,
+  TONES_TRAINING_STORAGE_KEY,
   TrainPlayerArgs,
 } from '@/constants';
 import BasicSettings from '@/pages/Instrument/ToneTraining/components/BasicSettings';
 import PlaybackSettings from '@/pages/Instrument/ToneTraining/components/PlaybackSettings';
-import ScaleSettings from '@/pages/Instrument/ToneTraining/components/ScaleSettings';
 import TrainPlayer from '@/pages/Instrument/ToneTraining/components/trainPlayer';
 import { getPageSettings, setPageSettings } from '@/utils/storage';
 import { loadInstrument } from '@/utils/toneInstruments';
@@ -19,8 +20,6 @@ import {
 } from '@ant-design/pro-components';
 
 import React, { useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'tones:training';
 
 const HomePage: React.FC = () => {
   const [tonePlayerArgs, setTonePlayerArgs] = useState<TrainPlayerArgs>(
@@ -76,7 +75,7 @@ const HomePage: React.FC = () => {
 
   // Persistence logic
   useEffect(() => {
-    const saved = getPageSettings<any>(STORAGE_KEY, null);
+    const saved = getPageSettings<any>(TONES_TRAINING_STORAGE_KEY, null);
     if (saved) {
       try {
         const parsed = saved;
@@ -119,7 +118,7 @@ const HomePage: React.FC = () => {
   }, [form]);
 
   const onValuesChange = (_: any, allValues: any) => {
-    setPageSettings(STORAGE_KEY, allValues, '听音训练配置');
+    setPageSettings(TONES_TRAINING_STORAGE_KEY, allValues, '听音训练配置');
   };
 
   const formCommit = (v: any) => {
