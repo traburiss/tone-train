@@ -5,17 +5,17 @@ export const DEFAULT_NAME = 'Umi Max';
 export type ToneType = 'GuitarChords' | '12Tone' | '8Tone';
 export const DEFAULT_TONE_TYPE = 'GuitarChords';
 export const TONE_TYPE_OPTIONS = [
-  { label: '吉他和弦', value: 'GuitarChords' },
-  { label: '十二音阶', value: '12Tone' },
-  { label: '八度音阶', value: '8Tone' },
+  { label: 'option.tone-type.guitar-chords', value: 'GuitarChords' },
+  { label: 'option.tone-type.12-tone', value: '12-Tone' },
+  { label: 'option.tone-type.8-tone', value: '8-Tone' },
 ];
 
 export type InstrumentName = 'guitar-acoustic' | 'guitar-electric' | 'piano';
 export const DEFAULT_INSTRUMENT_NAME = 'guitar-acoustic';
 export const INSTRUMENT_NAME_OPTIONS = [
-  { label: '原声吉他', value: 'guitar-acoustic' },
-  { label: '电吉他', value: 'guitar-electric' },
-  { label: '钢琴', value: 'piano' },
+  { label: 'option.instrument.guitar-acoustic', value: 'guitar-acoustic' },
+  { label: 'option.instrument.guitar-electric', value: 'guitar-electric' },
+  { label: 'option.instrument.piano', value: 'piano' },
 ];
 
 export const MAJOR_SCALE = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -99,11 +99,11 @@ export const DEFAULT_GUITAR_CHORDS = ['C', 'D', 'G', 'A', 'Em', 'Am', 'Dm'];
 export const DEFAULT_TONE_LIST = ['C', 'D', 'G', 'A', 'Em', 'Am', 'Dm'];
 
 export const LOOP_COUNT_OPTIONS = [
-  { label: '无限', value: '0' },
+  { label: 'option.loop-count.infinite', value: '0' },
   { label: '20次', value: '20' },
   { label: '50次', value: '50' },
   { label: '200次', value: '200' },
-  { label: '手动输入', value: 'custom' },
+  { label: 'option.loop-count.custom', value: 'custom' },
 ];
 
 export const DEFAULT_TTS_ENABLE = true;
@@ -115,6 +115,34 @@ export const DEFAULT_TTS_NOTATION_WAIT = 1500;
 export const MIX_DURATION = 100;
 export const MAX_DURATION = 10 * 1000;
 export const DURATION_STEP = 100;
+
+export const GET_DURATION_FORMATTER = (intl: any): Formatter => {
+  return (value: any) => {
+    const ms = Number(value);
+    if (isNaN(ms)) return `${value}`;
+
+    const seconds = Math.floor(ms / 1000);
+    let timeStr = '';
+
+    const secLabel = intl.formatMessage({ id: 'formatter.second' });
+    const minLabel = intl.formatMessage({ id: 'formatter.minute' });
+    const msLabel = intl.formatMessage({ id: 'formatter.millisecond' });
+
+    if (seconds < 60) {
+      timeStr = `${seconds}${secLabel}`;
+    } else {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      timeStr = `${minutes}${minLabel}`;
+      if (remainingSeconds > 0) {
+        timeStr += `${remainingSeconds}${secLabel}`;
+      }
+    }
+
+    return `${ms} ${msLabel} (${timeStr})`;
+  };
+};
+
 export const DURATION_FORMATTER: Formatter = (value: any) => {
   const ms = Number(value);
   if (isNaN(ms)) return `${value}`;
@@ -123,17 +151,17 @@ export const DURATION_FORMATTER: Formatter = (value: any) => {
   let timeStr = '';
 
   if (seconds < 60) {
-    timeStr = `${seconds}秒`;
+    timeStr = `${seconds}s`;
   } else {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    timeStr = `${minutes}分`;
+    timeStr = `${minutes}m`;
     if (remainingSeconds > 0) {
-      timeStr += `${remainingSeconds}秒`;
+      timeStr += `${remainingSeconds}s`;
     }
   }
 
-  return `${ms} 毫秒 (${timeStr})`;
+  return `${ms} ms (${timeStr})`;
 };
 export const DEFAULT_TONE_DURATION = 1000;
 export const DEFAULT_TONE_WAIT = 1500;
@@ -196,11 +224,12 @@ export const TONES_IDENTIFICATION_STORAGE_KEY = 'tones:identification';
 
 export const CONFIG_kEY_LIST = [
   {
-    name: '听音训练',
+    name: 'menu.instrument.tone-training',
     key: TONES_TRAINING_STORAGE_KEY,
   },
   {
-    name: '听音判断',
+    name: 'menu.instrument.tone-identification',
     key: TONES_IDENTIFICATION_STORAGE_KEY,
   },
 ];
+

@@ -14,12 +14,14 @@ import {
   ProFormRadio,
 } from '@ant-design/pro-components';
 import { Button, Card, Form, Space } from 'antd';
+import { useIntl } from '@umijs/max';
 import React, { useState } from 'react';
 import './index.css';
 
 const ScaleSettings: React.FC = () => {
   const form = Form.useFormInstance();
   const [expandedOctaves, setExpandedOctaves] = useState<number[]>([]);
+  const intl = useIntl();
 
   const toggleOctave = (oct: number) => {
     setExpandedOctaves((prev) =>
@@ -74,7 +76,7 @@ const ScaleSettings: React.FC = () => {
     <ProFormDependency name={['toneType', 'toneListGroup']}>
       {({ toneType, toneListGroup }) => (
         <Card
-          title="音阶设置"
+          title={intl.formatMessage({ id: 'tone-training.scale-settings' })}
           className="scale-card mb-6"
           extra={
             <Space size={12} wrap>
@@ -83,14 +85,14 @@ const ScaleSettings: React.FC = () => {
                   size="small"
                   onClick={() => handleSelectAllGlobal(true, toneType)}
                 >
-                  全选
+                  {intl.formatMessage({ id: 'common.select-all' })}
                 </Button>
                 {toneType !== '8Tone' && toneType !== 'GuitarChords' && (
                   <Button
                     size="small"
                     onClick={() => handleSelectMajorGlobal(true)}
                   >
-                    全音
+                    {intl.formatMessage({ id: 'tone-training.select-major' })}
                   </Button>
                 )}
               </Space>
@@ -118,7 +120,10 @@ const ScaleSettings: React.FC = () => {
                     }
                   },
                 }}
-                options={TONE_TYPE_OPTIONS}
+                options={TONE_TYPE_OPTIONS.map((opt) => ({
+                  ...opt,
+                  label: intl.formatMessage({ id: opt.label }),
+                }))}
               />
             </Space>
           }
@@ -128,7 +133,7 @@ const ScaleSettings: React.FC = () => {
               <div className="octave-row p-2 sm:p-2.5 border border-[#f0f0f0] rounded-lg bg-[#fafafa] flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                   <span className="font-bold text-[14px] sm:text-[15px] text-[#1a1a1a] mr-1">
-                    和弦
+                    {intl.formatMessage({ id: 'tone-training.chords' })}
                   </span>
                   <Space size={4}>
                     <Button
@@ -150,7 +155,7 @@ const ScaleSettings: React.FC = () => {
                       }}
                       className="text-[12px]"
                     >
-                      全选
+                      {intl.formatMessage({ id: 'common.select-all' })}
                     </Button>
                   </Space>
                   <span className="text-[11px] sm:text-[12px] color-[#888] ml-1 min-w-[20px]">
@@ -199,7 +204,7 @@ const ScaleSettings: React.FC = () => {
                           }
                           className="text-[12px]"
                         >
-                          全选
+                          {intl.formatMessage({ id: 'common.select-all' })}
                         </Button>
                         {toneType !== '8Tone' && (
                           <Button
@@ -210,7 +215,7 @@ const ScaleSettings: React.FC = () => {
                             }
                             className="text-[12px]"
                           >
-                            全音
+                            {intl.formatMessage({ id: 'tone-training.select-major' })}
                           </Button>
                         )}
                       </Space>
@@ -227,11 +232,13 @@ const ScaleSettings: React.FC = () => {
                       >
                         {expandedOctaves.includes(oct) ? (
                           <>
-                            收起 <DownOutlined className="text-[10px]" />
+                            {intl.formatMessage({ id: 'common.collapse' })}{' '}
+                            <DownOutlined className="text-[10px]" />
                           </>
                         ) : (
                           <>
-                            展开 <RightOutlined className="text-[10px]" />
+                            {intl.formatMessage({ id: 'common.expand' })}{' '}
+                            <RightOutlined className="text-[10px]" />
                           </>
                         )}
                       </Button>

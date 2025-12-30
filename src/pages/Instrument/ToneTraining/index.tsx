@@ -18,6 +18,7 @@ import {
   PageContainer,
   ProForm,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 
 import React, { useEffect, useState } from 'react';
 
@@ -27,6 +28,7 @@ const HomePage: React.FC = () => {
   );
   const [tonePlayerOpen, setTonePlayerOpen] = useState<boolean>(false);
   const [form] = ProForm.useForm();
+  const intl = useIntl();
 
   // Watch instrument name for status display
   // Use correct default constant as fallback
@@ -118,7 +120,11 @@ const HomePage: React.FC = () => {
   }, [form]);
 
   const onValuesChange = (_: any, allValues: any) => {
-    setPageSettings(TONES_TRAINING_STORAGE_KEY, allValues, '听音训练配置');
+    setPageSettings(
+      TONES_TRAINING_STORAGE_KEY,
+      allValues,
+      intl.formatMessage({ id: 'tone-training.storage-name' }),
+    );
   };
 
   const formCommit = (v: any) => {
@@ -140,7 +146,7 @@ const HomePage: React.FC = () => {
   return (
     <PageContainer
       header={{
-        title: '听音训练',
+        title: intl.formatMessage({ id: 'menu.instrument.tone-training' }),
       }}
     >
       <ProForm
@@ -157,8 +163,10 @@ const HomePage: React.FC = () => {
         layout={'horizontal'}
         submitter={{
           searchConfig: {
-            resetText: '重置',
-            submitText: '开始训练',
+            resetText: intl.formatMessage({ id: 'common.reset' }),
+            submitText: intl.formatMessage({
+              id: 'tone-training.start-training',
+            }),
           },
           render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
         }}
@@ -175,5 +183,6 @@ const HomePage: React.FC = () => {
     </PageContainer>
   );
 };
+
 
 export default HomePage;

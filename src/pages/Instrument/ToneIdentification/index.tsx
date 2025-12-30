@@ -1,23 +1,25 @@
 import { PageContainer } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import React, { useState } from 'react';
 import Practice from './Practice';
 import Statistics from './Statistics';
 
 const ToneIdentificationPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('practice');
+  const intl = useIntl();
 
   return (
     <PageContainer
       header={{
-        title: '听音判断',
+        title: intl.formatMessage({ id: 'menu.instrument.tone-identification' }),
       }}
       tabList={[
         {
-          tab: '功能练习',
+          tab: intl.formatMessage({ id: 'tone-identification.practice' }),
           key: 'practice',
         },
         {
-          tab: '统计分析',
+          tab: intl.formatMessage({ id: 'tone-identification.statistics' }),
           key: 'statistics',
         },
       ]}
@@ -29,5 +31,6 @@ const ToneIdentificationPage: React.FC = () => {
     </PageContainer>
   );
 };
+
 
 export default ToneIdentificationPage;

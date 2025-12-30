@@ -11,31 +11,46 @@ import {
   ProFormSelect,
   ProFormSwitch,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Card } from 'antd';
 import React from 'react';
 
 const BasicSettings: React.FC = () => {
+  const intl = useIntl();
+
   return (
-    <Card title="基础配置" className="mb-3 sm:mb-6">
+    <Card
+      title={intl.formatMessage({ id: 'common.basic-settings' })}
+      className="mb-3 sm:mb-6"
+    >
       <ProForm.Group>
         <ProFormRadio.Group
           name="instrumentName"
-          label="音色选择"
-          tooltip="用户可以选择自己习惯的音色来听音名播放"
+          label={intl.formatMessage({ id: 'common.instrument-choice' })}
+          tooltip={intl.formatMessage({ id: 'common.instrument-choice.tooltip' })}
           radioType="button"
           fieldProps={{ buttonStyle: 'solid', size: 'small' }}
-          options={INSTRUMENT_NAME_OPTIONS}
+          options={INSTRUMENT_NAME_OPTIONS.map((opt) => ({
+            ...opt,
+            label: intl.formatMessage({ id: opt.label }),
+          }))}
         />
       </ProForm.Group>
 
       <ProForm.Group>
         <ProFormRadio.Group
           name="loopCountType"
-          label="循环次数"
-          tooltip="用户可以选择循环次数，或者自定义循环次数"
+          label={intl.formatMessage({ id: 'common.loop-count' })}
+          tooltip={intl.formatMessage({ id: 'common.loop-count.tooltip' })}
           radioType="button"
           fieldProps={{ buttonStyle: 'solid', size: 'small' }}
-          options={LOOP_COUNT_OPTIONS}
+          options={LOOP_COUNT_OPTIONS.map((opt) => ({
+            ...opt,
+            label: intl.formatMessage({
+              id: opt.label,
+              defaultMessage: opt.label,
+            }),
+          }))}
         />
         <ProFormDependency name={['loopCountType']}>
           {({ loopCountType }) =>
@@ -44,7 +59,7 @@ const BasicSettings: React.FC = () => {
                 name="loopCountCustom"
                 label=" "
                 width="xs"
-                placeholder="次数"
+                placeholder={intl.formatMessage({ id: 'common.count' })}
                 min={1}
                 max={1000}
                 fieldProps={{ precision: 0 }}
@@ -57,15 +72,15 @@ const BasicSettings: React.FC = () => {
       <ProForm.Group>
         <ProFormSwitch
           name="random"
-          label="随机播放"
-          tooltip="不要按照音阶顺序播放音阶"
+          label={intl.formatMessage({ id: 'common.random-play' })}
+          tooltip={intl.formatMessage({ id: 'common.random-play.tooltip' })}
         />
       </ProForm.Group>
       <ProForm.Group>
         <ProFormSwitch
           name="referenceNoteEnabled"
-          label="播放基准"
-          tooltip="播放音阶时，会先播放基准音，再播放音阶，以降低难度"
+          label={intl.formatMessage({ id: 'common.reference-note' })}
+          tooltip={intl.formatMessage({ id: 'common.reference-note.tooltip' })}
         />
         <ProFormDependency name={['referenceNoteEnabled']}>
           {({ referenceNoteEnabled }) =>
@@ -75,7 +90,9 @@ const BasicSettings: React.FC = () => {
                 label=" "
                 width="xs"
                 options={REFERENCE_NOTE_OPTIONS}
-                placeholder="选择基准音"
+                placeholder={intl.formatMessage({
+                  id: 'common.reference-note.placeholder',
+                })}
               />
             )
           }
@@ -84,5 +101,6 @@ const BasicSettings: React.FC = () => {
     </Card>
   );
 };
+
 
 export default BasicSettings;

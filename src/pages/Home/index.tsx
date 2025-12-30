@@ -1,16 +1,22 @@
-import { SettingOutlined, SoundOutlined } from '@ant-design/icons';
+import {
+  CustomerServiceOutlined,
+  SettingOutlined,
+  SoundOutlined,
+} from '@ant-design/icons';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
-import { history } from '@umijs/max';
+import { history, useIntl } from '@umijs/max';
 import React from 'react';
 
 const HomePage: React.FC = () => {
+  const intl = useIntl();
+
   return (
-    <PageContainer title="欢迎使用音乐助教">
+    <PageContainer title={intl.formatMessage({ id: 'home.welcome' })}>
       <ProCard
         ghost
         gutter={[16, 16]}
         wrap
-        title="器乐训练"
+        title={intl.formatMessage({ id: 'menu.instrument' })}
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
@@ -24,13 +30,21 @@ const HomePage: React.FC = () => {
           title={
             <div className="flex items-center gap-2">
               <SoundOutlined className="text-blue-500" />
-              <span>听音训练</span>
+              <span>
+                {intl.formatMessage({ id: 'menu.instrument.tone-training' })}
+              </span>
             </div>
           }
         >
           <div className="text-gray-500 text-center py-4">
-            <div>磨耳朵，提升音感</div>
-            <div className="mt-2 text-xs">通过反复聆听和弦与单音，提高自己的音感；支持和弦、单音等多种训练模式</div>
+            <div>
+              {intl.formatMessage({
+                id: 'home.training.tone-training.subtitle',
+              })}
+            </div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({ id: 'home.training.tone-training.desc' })}
+            </div>
           </div>
         </ProCard>
         <ProCard
@@ -43,14 +57,26 @@ const HomePage: React.FC = () => {
           }}
           title={
             <div className="flex items-center gap-2">
-              <SoundOutlined className="text-green-500" />
-              <span>听音判断</span>
+              <CustomerServiceOutlined className="text-green-500" />
+              <span>
+                {intl.formatMessage({
+                  id: 'menu.instrument.tone-identification',
+                })}
+              </span>
             </div>
           }
         >
           <div className="text-gray-500 text-center py-4">
-            <div>练习辨音，挑战自我</div>
-            <div className="mt-2 text-xs">通过听音后从多个选项中选出正确和弦/单音的模式，提高自己对和弦与单音的音感；支持多种难度和限时挑战模式</div>
+            <div>
+              {intl.formatMessage({
+                id: 'home.training.tone-identification.subtitle',
+              })}
+            </div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({
+                id: 'home.training.tone-identification.desc',
+              })}
+            </div>
           </div>
         </ProCard>
       </ProCard>
@@ -58,7 +84,7 @@ const HomePage: React.FC = () => {
         ghost
         gutter={[16, 16]}
         wrap
-        title="设置"
+        title={intl.formatMessage({ id: 'menu.settings' })}
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
@@ -72,13 +98,15 @@ const HomePage: React.FC = () => {
           title={
             <div className="flex items-center gap-2">
               <SettingOutlined className="text-gray-500" />
-              <span>系统设置</span>
+              <span>{intl.formatMessage({ id: 'menu.settings' })}</span>
             </div>
           }
         >
           <div className="text-gray-500 text-center py-4">
-            <div>管理您的应用配置</div>
-            <div className="mt-2 text-xs">支持导入导出、重置及源码编辑</div>
+            <div>{intl.formatMessage({ id: 'home.settings.subtitle' })}</div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({ id: 'home.settings.desc' })}
+            </div>
           </div>
         </ProCard>
       </ProCard>

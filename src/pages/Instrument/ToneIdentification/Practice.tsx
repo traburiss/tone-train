@@ -2,7 +2,7 @@ import ScaleSettings from '@/components/ScaleSettings';
 import {
   DEFAULT_INSTRUMENT_NAME,
   DEFAULT_TONE_TYPE,
-  DURATION_FORMATTER,
+  GET_DURATION_FORMATTER,
   INSTRUMENT_NAME_OPTIONS,
   TONES_IDENTIFICATION_STORAGE_KEY,
 } from '@/constants';
@@ -16,6 +16,7 @@ import {
   ProFormRadio,
   ProFormSlider,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Card, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import IdentificationGame from './IdentificationGame';
@@ -51,6 +52,8 @@ const Practice: React.FC = () => {
   const [form] = ProForm.useForm();
   const [gameOpen, setGameOpen] = useState(false);
   const [gameArgs, setGameArgs] = useState<IdentificationSettings | null>(null);
+  const intl = useIntl();
+  const durationFormatter = GET_DURATION_FORMATTER(intl);
 
   const instrumentName =
     ProForm.useWatch('instrumentName', form) || DEFAULT_INSTRUMENT_NAME;
@@ -66,7 +69,7 @@ const Practice: React.FC = () => {
       null,
     );
     if (saved) {
-      form.setFieldsValue(saved);
+      form.setFieldsValue(saved as any);
     }
   }, [form]);
 
@@ -74,7 +77,7 @@ const Practice: React.FC = () => {
     setPageSettings(
       TONES_IDENTIFICATION_STORAGE_KEY,
       allValues,
-      '听音判断配置',
+      intl.formatMessage({ id: 'tone-identification.storage-name' }),
     );
   };
 
@@ -95,7 +98,10 @@ const Practice: React.FC = () => {
 
     if (selectedTones.length < difficulty) {
       message.error(
-        `当前选择的音符/和弦数量 (${selectedTones.length}) 不足，至少需要选择 ${difficulty} 个才能开始当前难度的测试。`,
+        intl.formatMessage(
+          { id: 'tone-identification.difficulty-error' },
+          { count: selectedTones.length, difficulty },
+        ),
       );
       return;
     }
@@ -113,33 +119,65 @@ const Practice: React.FC = () => {
         onFinish={onFinish}
         submitter={{
           searchConfig: {
-            submitText: '开始测试',
+            submitText: intl.formatMessage({
+              id: 'tone-identification.start-test',
+            }),
           },
           render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
         }}
       >
         <ScaleSettings />
 
-        <Card title="测试配置" className="mb-6">
+        <Card
+          title={intl.formatMessage({ id: 'tone-identification.test-settings' })}
+          className="mb-6"
+        >
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 border-b pb-4">
               <ProFormRadio.Group
                 name="instrumentName"
-                label="乐器音色"
+                label={intl.formatMessage({
+                  id: 'tone-identification.instrument',
+                })}
                 radioType="button"
                 fieldProps={{ buttonStyle: 'solid', size: 'small' }}
-                options={INSTRUMENT_NAME_OPTIONS}
+                options={INSTRUMENT_NAME_OPTIONS.map((opt) => ({
+                  ...opt,
+                  label: intl.formatMessage({ id: opt.label }),
+                }))}
               />
               <ProFormRadio.Group
                 name="difficulty"
-                label="问题难度"
+                label={intl.formatMessage({
+                  id: 'tone-identification.difficulty',
+                })}
                 radioType="button"
                 fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={[
-                  { label: '简单 (2选1)', value: 2 },
-                  { label: '中等 (4选1)', value: 4 },
-                  { label: '困难 (6选1)', value: 6 },
-                  { label: '地狱 (8选1)', value: 8 },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.difficulty.easy',
+                    }),
+                    value: 2,
+                  },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.difficulty.medium',
+                    }),
+                    value: 4,
+                  },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.difficulty.hard',
+                    }),
+                    value: 6,
+                  },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.difficulty.hell',
+                    }),
+                    value: 8,
+                  },
                 ]}
               />
             </div>
@@ -147,24 +185,28 @@ const Practice: React.FC = () => {
             <div className="flex flex-wrap gap-x-8 gap-y-0 border-b pb-4">
               <ProFormSlider
                 name="toneDuration"
-                label="音播放时长"
+                label={intl.formatMessage({
+                  id: 'tone-identification.tone-duration',
+                })}
                 min={100}
                 max={5000}
                 step={100}
                 width="md"
                 fieldProps={{
-                  tooltip: { formatter: DURATION_FORMATTER },
+                  tooltip: { formatter: durationFormatter },
                 }}
               />
               <ProFormSlider
                 name="toneWait"
-                label="音播放完等待时长"
+                label={intl.formatMessage({
+                  id: 'tone-identification.tone-wait',
+                })}
                 min={100}
                 max={5000}
                 step={100}
                 width="md"
                 fieldProps={{
-                  tooltip: { formatter: DURATION_FORMATTER },
+                  tooltip: { formatter: durationFormatter },
                 }}
               />
             </div>
@@ -172,12 +214,22 @@ const Practice: React.FC = () => {
             <div className="flex flex-wrap items-center gap-8">
               <ProFormRadio.Group
                 name="mode"
-                label="测试模式"
+                label={intl.formatMessage({ id: 'tone-identification.mode' })}
                 radioType="button"
                 fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={[
-                  { label: '无限模式', value: 'infinite' },
-                  { label: '限时挑战', value: 'timed' },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.mode.infinite',
+                    }),
+                    value: 'infinite',
+                  },
+                  {
+                    label: intl.formatMessage({
+                      id: 'tone-identification.mode.timed',
+                    }),
+                    value: 'timed',
+                  },
                 ]}
               />
 
@@ -186,7 +238,9 @@ const Practice: React.FC = () => {
                   mode === 'timed' && (
                     <ProFormDigit
                       name="timeLimit"
-                      label="时间上限 (秒)"
+                      label={intl.formatMessage({
+                        id: 'tone-identification.time-limit',
+                      })}
                       width="xs"
                       min={10}
                       fieldProps={{
@@ -200,6 +254,7 @@ const Practice: React.FC = () => {
           </div>
         </Card>
       </ProForm>
+
 
       {gameArgs && (
         <IdentificationGame

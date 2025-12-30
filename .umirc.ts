@@ -7,36 +7,46 @@ export default defineConfig({
   initialState: {},
   request: {},
   layout: {
-    title: '音乐助教',
     layout: 'top',
     siderWidth: 0,
+  },
+  locale: {
+    default: 'zh-CN',
+    antd: true,
+    baseNavigator: true,
+    title: true,
+    useLocalStorage: true,
   },
   favicons: ['logo.svg'],
   routes: [
     {
-      name: '首页',
+      title: 'menu.home',
       path: '/',
       component: './Home',
+      icon: 'HomeOutlined',
     },
     {
-      name: '器乐训练',
+      title: 'menu.instrument',
+      icon: 'CustomerServiceOutlined',
       routes: [
         {
-          name: '听音训练',
+          title: 'menu.instrument.tone-training',
           path: '/instrument/tone-training',
           component: './Instrument/ToneTraining',
+          icon: 'SoundOutlined',
         },
         {
-          name: '听音判断',
+          title: 'menu.instrument.tone-identification',
           path: '/instrument/tone-identification',
           component: './Instrument/ToneIdentification',
+          icon: 'CustomerServiceOutlined',
         },
       ],
     },
     {
-      name: '系统设置',
+      title: 'menu.settings',
       path: '/settings',
-      icon: 'setting',
+      icon: 'SettingOutlined',
       component: './Settings',
     },
   ],

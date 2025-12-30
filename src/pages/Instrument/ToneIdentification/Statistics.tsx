@@ -1,4 +1,5 @@
 import { Button, Card, Empty, Select, Space, Statistic, Table } from 'antd';
+import { useIntl } from '@umijs/max';
 import React, { useMemo, useState } from 'react';
 import { clearIdentificationStats, getIdentificationStats } from './statsStore';
 
@@ -8,7 +9,13 @@ const HistoryChart: React.FC<{
   color: string;
   suffix?: string;
 }> = ({ data, label, color = '' }) => {
-  if (data.length === 0) return <Empty description="暂无数据" />;
+  const intl = useIntl();
+  if (data.length === 0)
+    return (
+      <Empty
+        description={intl.formatMessage({ id: 'common.no-data' })}
+      />
+    );
 
   const width = 600;
   const height = 200;
@@ -69,8 +76,8 @@ const HistoryChart: React.FC<{
         })}
       </svg>
       <div className="flex justify-between text-xs text-gray-400 mt-1 px-5">
-        <span>较早</span>
-        <span>最近</span>
+        <span>{intl.formatMessage({ id: 'common.earlier' })}</span>
+        <span>{intl.formatMessage({ id: 'common.recent' })}</span>
       </div>
     </div>
   );
@@ -82,6 +89,7 @@ const Statistics: React.FC = () => {
     'all',
   );
   const [filterMode, setFilterMode] = useState<string | 'all'>('all');
+  const intl = useIntl();
 
   const allStats = useMemo(() => getIdentificationStats(), []);
 
@@ -119,52 +127,104 @@ const Statistics: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card title="统计配置" size="small">
+      <Card
+        title={intl.formatMessage({ id: 'stats.config' })}
+        size="small"
+      >
         <Space wrap size={16}>
           <div>
-            <span className="mr-2">历史长度:</span>
+            <span className="mr-2">
+              {intl.formatMessage({ id: 'stats.history-length' })}:
+            </span>
             <Select
               value={historyLength}
               onChange={setHistoryLength}
-              style={{ width: 100 }}
-              options={[
-                { label: '最近10次', value: 10 },
-                { label: '最近20次', value: 20 },
-                { label: '最近50次', value: 50 },
-                { label: '最近100次', value: 100 },
-              ]}
+              style={{ width: 140 }}
+              options={[10, 20, 50, 100].map((n) => ({
+                label: intl.formatMessage(
+                  { id: 'stats.history-length.n' },
+                  { n },
+                ),
+                value: n,
+              }))}
             />
           </div>
           <div>
-            <span className="mr-2">难度筛选:</span>
+            <span className="mr-2">
+              {intl.formatMessage({ id: 'stats.difficulty-filter' })}:
+            </span>
             <Select
               value={filterDifficulty}
               onChange={setFilterDifficulty}
-              style={{ width: 120 }}
+              style={{ width: 140 }}
               options={[
-                { label: '全部难度', value: 'all' },
-                { label: '简单 (2)', value: 2 },
-                { label: '中等 (4)', value: 4 },
-                { label: '困难 (6)', value: 6 },
-                { label: '地狱 (8)', value: 8 },
+                {
+                  label: intl.formatMessage({
+                    id: 'stats.difficulty-all',
+                  }),
+                  value: 'all',
+                },
+                {
+                  label: intl.formatMessage(
+                    { id: 'option.difficulty.n-choice-1' },
+                    { n: 2 },
+                  ),
+                  value: 2,
+                },
+                {
+                  label: intl.formatMessage(
+                    { id: 'option.difficulty.n-choice-1' },
+                    { n: 4 },
+                  ),
+                  value: 4,
+                },
+                {
+                  label: intl.formatMessage(
+                    { id: 'option.difficulty.n-choice-1' },
+                    { n: 6 },
+                  ),
+                  value: 6,
+                },
+                {
+                  label: intl.formatMessage(
+                    { id: 'option.difficulty.n-choice-1' },
+                    { n: 8 },
+                  ),
+                  value: 8,
+                },
               ]}
             />
           </div>
           <div>
-            <span className="mr-2">模式筛选:</span>
+            <span className="mr-2">
+              {intl.formatMessage({ id: 'stats.mode-filter' })}:
+            </span>
             <Select
               value={filterMode}
               onChange={setFilterMode}
-              style={{ width: 120 }}
+              style={{ width: 140 }}
               options={[
-                { label: '全部模式', value: 'all' },
-                { label: '限时挑战', value: 'timed' },
-                { label: '无限模式', value: 'infinite' },
+                {
+                  label: intl.formatMessage({ id: 'stats.mode-all' }),
+                  value: 'all',
+                },
+                {
+                  label: intl.formatMessage({
+                    id: 'tone-identification.mode.timed',
+                  }),
+                  value: 'timed',
+                },
+                {
+                  label: intl.formatMessage({
+                    id: 'tone-identification.mode.infinite',
+                  }),
+                  value: 'infinite',
+                },
               ]}
             />
           </div>
           <Button danger size="small" onClick={handleClear}>
-            重置所有数据
+            {intl.formatMessage({ id: 'stats.reset-data' })}
           </Button>
         </Space>
       </Card>
@@ -172,7 +232,7 @@ const Statistics: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card size="small">
           <Statistic
-            title="平均准确率"
+            title={intl.formatMessage({ id: 'stats.avg-accuracy' })}
             value={avgAccuracy * 100}
             precision={1}
             suffix="%"
@@ -181,7 +241,7 @@ const Statistics: React.FC = () => {
           <div className="mt-4">
             <HistoryChart
               data={filteredStats.map((s) => s.accuracy * 100)}
-              label="准确率趋势 (%)"
+              label={intl.formatMessage({ id: 'stats.accuracy-trend' })}
               color="#3f8600"
             />
           </div>
@@ -189,7 +249,7 @@ const Statistics: React.FC = () => {
 
         <Card size="small">
           <Statistic
-            title="平均反应时间"
+            title={intl.formatMessage({ id: 'stats.avg-response-time' })}
             value={avgTime}
             precision={2}
             suffix="s"
@@ -198,41 +258,60 @@ const Statistics: React.FC = () => {
           <div className="mt-4">
             <HistoryChart
               data={filteredStats.map((s) => s.avgResponseTime)}
-              label="反应时间趋势 (秒)"
+              label={intl.formatMessage({
+                id: 'stats.response-time-trend',
+              })}
               color="#1890ff"
             />
           </div>
         </Card>
       </div>
 
-      <Card title="详细历史" size="small">
+      <Card
+        title={intl.formatMessage({ id: 'stats.detailed-history' })}
+        size="small"
+      >
         <Table
           dataSource={filteredStats.map((s, i) => ({ ...s, key: i }))}
           columns={[
             {
-              title: '时间',
+              title: intl.formatMessage({ id: 'table.column.time' }),
               dataIndex: 'timestamp',
               render: (t) => new Date(t).toLocaleString(),
               responsive: ['md'],
             },
             {
-              title: '难度',
+              title: intl.formatMessage({ id: 'table.column.difficulty' }),
               dataIndex: 'difficulty',
-              render: (d) => `${d}选1`,
+              render: (d) =>
+                intl.formatMessage(
+                  { id: 'option.difficulty.n-choice-1' },
+                  { n: d },
+                ),
             },
             {
-              title: '模式',
+              title: intl.formatMessage({ id: 'table.column.mode' }),
               dataIndex: 'mode',
-              render: (m) => (m === 'timed' ? '限时' : '无限'),
+              render: (m) =>
+                m === 'timed'
+                  ? intl.formatMessage({
+                      id: 'option.mode.timed.short',
+                    })
+                  : intl.formatMessage({
+                      id: 'option.mode.infinite.short',
+                    }),
             },
-            { title: '得分', dataIndex: 'correctCount' },
             {
-              title: '准确率',
+              title: intl.formatMessage({ id: 'table.column.score' }),
+              dataIndex: 'correctCount',
+            },
+            {
+              title: intl.formatMessage({ id: 'table.column.accuracy' }),
               dataIndex: 'accuracy',
               render: (a) => `${(a * 100).toFixed(0)}%`,
             },
             {
-              title: '耗时',
+              title: intl.formatMessage({ id: 'table.column.duration' }),
               dataIndex: 'avgResponseTime',
               render: (r) => `${r.toFixed(2)}s`,
             },
@@ -244,5 +323,6 @@ const Statistics: React.FC = () => {
     </div>
   );
 };
+
 
 export default Statistics;

@@ -1,13 +1,19 @@
 import GlobalInstrumentLoader from '@/components/GlobalInstrumentLoader';
+import { getIntl, SelectLang } from '@umijs/max';
 
 export const layout = () => {
   return {
     logo: 'logo.svg',
-    title: '音乐助教',
+    title: getIntl().formatMessage({ id: 'app.name' }),
     menu: {
-      locale: false,
+      locale: true,
     },
     layout: 'top',
-    rightContentRender: () => <GlobalInstrumentLoader />,
+    rightContentRender: () => (
+      <>
+        <GlobalInstrumentLoader />
+        <SelectLang />
+      </>
+    ),
   };
 };

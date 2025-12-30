@@ -8,6 +8,7 @@ import {
 } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
 import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
+import { useIntl } from '@umijs/max';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
@@ -31,6 +32,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [currentTone, setCurrentTone] = useState<string>('...');
   const [showResult, setShowResult] = useState<boolean>(false);
   const [, contextHolder] = notification.useNotification();
+  const intl = useIntl();
 
   // Ref to track the sequential index (0 to length-1) across intervals
   const seqIndexRef = React.useRef(0);
@@ -320,11 +322,11 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const confirmCancel = () => {
     setPaused(true);
     confirm({
-      title: '确认停止',
+      title: intl.formatMessage({ id: 'tone-training.stop.confirm-title' }),
       icon: <ExclamationCircleFilled />,
-      content: '确认停止训练吗？',
-      okText: '确认关闭',
-      cancelText: '我点错了',
+      content: intl.formatMessage({ id: 'tone-training.stop.confirm-content' }),
+      okText: intl.formatMessage({ id: 'common.confirm-close' }),
+      cancelText: intl.formatMessage({ id: 'common.cancel-mistake' }),
       onOk() {
         props.onCancel();
       },
@@ -340,9 +342,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     if (status === 'loading') {
       return (
         <>
-          <div>当前的音是</div>
+          <div>{intl.formatMessage({ id: 'tone-training.current-tone' })}</div>
           <div className="text-yellow-600 text-sm">
-            音色加载中, 暂时使用MIDI音...
+            {intl.formatMessage({ id: 'tone-training.instrument-loading-hint' })}
           </div>
         </>
       );
@@ -350,12 +352,14 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     if (status === 'error') {
       return (
         <>
-          <div>当前的音是</div>
-          <div className="text-red-600 text-sm">音色加载失败, 使用MIDI音</div>
+          <div>{intl.formatMessage({ id: 'tone-training.current-tone' })}</div>
+          <div className="text-red-600 text-sm">
+            {intl.formatMessage({ id: 'tone-training.instrument-error-hint' })}
+          </div>
         </>
       );
     }
-    return '当前的音是';
+    return intl.formatMessage({ id: 'tone-training.current-tone' });
   };
 
   return (
@@ -367,12 +371,20 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         width={'80%'}
         height={'80%'}
         maskClosable={false}
-        okText={paused ? '恢复训练' : '暂停训练'}
+        okText={
+          paused
+            ? intl.formatMessage({ id: 'tone-training.resume' })
+            : intl.formatMessage({ id: 'tone-training.pause' })
+        }
         onOk={pauseTrain}
-        cancelText={'停止训练'}
+        cancelText={intl.formatMessage({ id: 'tone-training.stop' })}
         onCancel={confirmCancel}
         loading={loading}
-        title={loading ? '加载音色中' : '训练'}
+        title={
+          loading
+            ? intl.formatMessage({ id: 'tone-training.instrument-loading' })
+            : intl.formatMessage({ id: 'tone-training.title' })
+        }
       >
         <Result
           className={styles.trainPlayInfo}

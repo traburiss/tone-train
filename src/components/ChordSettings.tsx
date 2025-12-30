@@ -1,6 +1,7 @@
 import { CHORD_FINGERINGS } from '@/utils/musicTheory';
+import { useIntl } from '@umijs/max';
 import { Button, Checkbox } from 'antd';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import ChordDiagram from './ChordDiagram';
 
 const MAJOR_CHORDS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -12,29 +13,67 @@ const M7_CHORDS = ['Am7', 'Em7', 'Dm7', 'Bm7', 'F#m7'];
 const SUS_CHORDS = ['Dsus4', 'Asus4', 'Esus4'];
 const SLASH_CHORDS = ['D/F#', 'C/G', 'G/B'];
 
-const GROUPS = [
-  { label: '大三和弦 (Major)', value: 'Major', chords: MAJOR_CHORDS },
-  { label: '小三和弦 (Minor)', value: 'Minor', chords: MINOR_CHORDS },
-  { label: '属七和弦 (7)', value: 'Dom7', chords: DOM7_CHORDS },
-  { label: '小七和弦 (m7)', value: 'm7', chords: M7_CHORDS },
-  { label: '大七和弦 (maj7)', value: 'maj7', chords: MAJ7_CHORDS },
-  { label: '挂留和弦 (sus)', value: 'sus', chords: SUS_CHORDS },
-  { label: '斜杠和弦 (Slash)', value: 'slash', chords: SLASH_CHORDS },
-  { label: '强力和弦 (Power)', value: 'power', chords: POWER_CHORDS },
-];
-
-const DEFAULT_ACTIVE_GROUPS = ['Major', 'Minor', 'Dom7', 'm7'];
-
 interface ChordSettingsProps {
   value?: string[];
   onChange?: (value: string[]) => void;
 }
 
 const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
+  const intl = useIntl();
   const selectedValues = value || [];
-  const [activeGroups, setActiveGroups] = useState<string[]>(
-    DEFAULT_ACTIVE_GROUPS,
+
+  const groups = useMemo(
+    () => [
+      {
+        label: intl.formatMessage({ id: 'chord.group.major' }),
+        value: 'Major',
+        chords: MAJOR_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.minor' }),
+        value: 'Minor',
+        chords: MINOR_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.dom7' }),
+        value: 'Dom7',
+        chords: DOM7_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.m7' }),
+        value: 'm7',
+        chords: M7_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.maj7' }),
+        value: 'maj7',
+        chords: MAJ7_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.sus' }),
+        value: 'sus',
+        chords: SUS_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.slash' }),
+        value: 'slash',
+        chords: SLASH_CHORDS,
+      },
+      {
+        label: intl.formatMessage({ id: 'chord.group.power' }),
+        value: 'power',
+        chords: POWER_CHORDS,
+      },
+    ],
+    [intl],
   );
+
+  const [activeGroups, setActiveGroups] = useState<string[]>([
+    'Major',
+    'Minor',
+    'Dom7',
+    'm7',
+  ]);
 
   const handleToggle = (chord: string) => {
     const newValues = selectedValues.includes(chord)
@@ -67,7 +106,9 @@ const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
         <div className="flex items-center gap-2 mb-3">
           <span className="font-bold text-base text-gray-700">{title}</span>
           <Button size="small" onClick={() => handleSelectAll(chords)}>
-            {allSelected ? '取消全选' : '全选'}
+            {allSelected
+              ? intl.formatMessage({ id: 'common.deselect-all' })
+              : intl.formatMessage({ id: 'common.select-all' })}
           </Button>
         </div>
         <div className="flex flex-wrap gap-2 sm:gap-4 justify-start">
@@ -79,7 +120,11 @@ const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
                 className={`
                   cursor-pointer rounded-lg border-2 p-1 sm:p-2 bg-white transition-all
                   flex flex-col items-center
-                  ${isSelected ? 'border-blue-500 shadow-md' : 'border-transparent hover:border-gray-200'}
+                  ${
+                    isSelected
+                      ? 'border-blue-500 shadow-md'
+                      : 'border-transparent hover:border-gray-200'
+                  }
                 `}
                 onClick={() => handleToggle(chordName)}
               >
@@ -101,7 +146,7 @@ const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
     <div className="w-full">
       <div className="mb-4 p-3 bg-white border border-gray-200 rounded-lg">
         <Checkbox.Group
-          options={GROUPS.map((g) => ({ label: g.label, value: g.value }))}
+          options={groups.map((g) => ({ label: g.label, value: g.value }))}
           value={activeGroups}
           onChange={(v) => {
             const newActiveGroups = v as string[];
@@ -112,7 +157,7 @@ const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
 
             if (removedGroups.length > 0) {
               const chordsToRemove = removedGroups.flatMap((gVal) => {
-                const group = GROUPS.find((g) => g.value === gVal);
+                const group = groups.find((g) => g.value === gVal);
                 return group ? group.chords : [];
               });
 
@@ -128,11 +173,14 @@ const ChordSettings: React.FC<ChordSettingsProps> = ({ value, onChange }) => {
         />
       </div>
 
-      {GROUPS.filter((g) => activeGroups.includes(g.value)).map((g) => (
-        <div key={g.value}>{renderGroup(g.label, g.chords)}</div>
-      ))}
+      {groups
+        .filter((g) => activeGroups.includes(g.value))
+        .map((g) => (
+          <div key={g.value}>{renderGroup(g.label, g.chords)}</div>
+        ))}
     </div>
   );
 };
+
 
 export default ChordSettings;

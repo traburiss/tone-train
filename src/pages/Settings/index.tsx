@@ -21,12 +21,14 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Button, Col, message, Modal, Row, Space, Upload } from 'antd';
 import React, { useEffect, useState } from 'react';
 import ConfigItemEditor from './components/ConfigItemEditor';
 
 const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<AppSettings>({});
+  const intl = useIntl();
 
   const refreshData = () => {
     setSettings(getAllSettings());
@@ -50,7 +52,11 @@ const SettingsPage: React.FC = () => {
     link.download = `mta-all-data-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success(key === null ? '导出全量数据成功' : `导出 ${key} 配置成功`);
+    message.success(
+      key === null
+        ? intl.formatMessage({ id: 'settings.export.all.success' })
+        : intl.formatMessage({ id: 'settings.export.config.success' }, { key }),
+    );
   };
 
   const handleExportConfig = (key: string | null = null) => {
@@ -65,7 +71,14 @@ const SettingsPage: React.FC = () => {
     link.download = `mta-config-only-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    message.success(key === null ? '导出配置数据成功' : `导出 ${key} 配置成功`);
+    message.success(
+      key === null
+        ? intl.formatMessage(
+            { id: 'settings.export.config.success' },
+            { key: 'all' },
+          )
+        : intl.formatMessage({ id: 'settings.export.config.success' }, { key }),
+    );
   };
 
   const handleExportStats = (key: string | null = null) => {
@@ -80,7 +93,12 @@ const SettingsPage: React.FC = () => {
     link.click();
     URL.revokeObjectURL(url);
     message.success(
-      key === null ? '导出统计数据成功' : `导出 ${key} 统计数据成功`,
+      key === null
+        ? intl.formatMessage({ id: 'settings.export.stats.success' })
+        : intl.formatMessage(
+            { id: 'settings.export.stats-item.success' },
+            { key },
+          ),
     );
   };
 
@@ -90,10 +108,10 @@ const SettingsPage: React.FC = () => {
       try {
         const json = JSON.parse(e.target?.result as string);
         importAllSettings(json);
-        message.success('导入数据成功');
+        message.success(intl.formatMessage({ id: 'settings.import.success' }));
         refreshData();
       } catch (err) {
-        message.error('导入失败：JSON 格式不正确');
+        message.error(intl.formatMessage({ id: 'settings.import.error' }));
       }
     };
     reader.readAsText(file);
@@ -108,7 +126,7 @@ const SettingsPage: React.FC = () => {
     Modal.confirm({
       title,
       content,
-      okText: '确认清理',
+      okText: intl.formatMessage({ id: 'settings.clear.confirm-ok' }),
       okType: 'danger',
       onOk,
     });
@@ -116,10 +134,18 @@ const SettingsPage: React.FC = () => {
 
   const handleClearAll = (key: string | null = null) => {
     clearWithConfirm(
-      key === null ? '确认重置所有数据？' : `确认重置 ${key} 数据？`,
       key === null
-        ? '该操作将删除所有（带有 mta:cfg 和 mta:sta 前缀的）本地设置和统计背景。'
-        : `该操作将删除所有带有 ${key} 前缀的本地设置和统计背景。`,
+        ? intl.formatMessage({ id: 'settings.clear.all-confirm-title' })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-confirm-title' },
+            { key },
+          ),
+      key === null
+        ? intl.formatMessage({ id: 'settings.clear.all-confirm-content' })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-confirm-content' },
+            { key },
+          ),
       () => {
         if (key === null) {
           clearAllSettings();
@@ -130,8 +156,11 @@ const SettingsPage: React.FC = () => {
         }
         message.success(
           key === null
-            ? '所有设置与统计已重置'
-            : `所有 ${key} 设置与统计已重置`,
+            ? intl.formatMessage({ id: 'settings.clear.all.success' })
+            : intl.formatMessage(
+                { id: 'settings.clear.item.success' },
+                { key },
+              ),
         );
         refreshData();
       },
@@ -140,10 +169,20 @@ const SettingsPage: React.FC = () => {
 
   const handleClearConfig = (key: string | null = null) => {
     clearWithConfirm(
-      key === null ? '确认清空所有配置？' : `确认清空 ${key} 配置？`,
       key === null
-        ? '该操作仅删除带有 mta:cfg 前缀的设置，统计数据将保留。'
-        : `该操作仅删除带有 ${key} 前缀的设置，统计数据将保留。`,
+        ? intl.formatMessage({ id: 'settings.clear.all-config-confirm-title' })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-config-confirm-title' },
+            { key },
+          ),
+      key === null
+        ? intl.formatMessage({
+            id: 'settings.clear.all-config-confirm-content',
+          })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-config-confirm-content' },
+            { key },
+          ),
       () => {
         if (key === null) {
           clearAllSettings();
@@ -151,7 +190,12 @@ const SettingsPage: React.FC = () => {
           clearPageSettings(key);
         }
         message.success(
-          key === null ? '所有配置已清空' : `所有 ${key} 配置已清空`,
+          key === null
+            ? intl.formatMessage({ id: 'settings.clear.config.success' })
+            : intl.formatMessage(
+                { id: 'settings.clear.config-item.success' },
+                { key },
+              ),
         );
         refreshData();
       },
@@ -160,10 +204,18 @@ const SettingsPage: React.FC = () => {
 
   const handleClearStats = (key: string | null = null) => {
     clearWithConfirm(
-      key === null ? '确认清空所有统计？' : `确认清空 ${key} 统计？`,
       key === null
-        ? '该操作仅删除带有 mta:sta 前缀的数据，配置信息将保留。'
-        : `该操作仅删除带有 ${key} 前缀的数据，配置信息将保留。`,
+        ? intl.formatMessage({ id: 'settings.clear.all-stats-confirm-title' })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-stats-confirm-title' },
+            { key },
+          ),
+      key === null
+        ? intl.formatMessage({ id: 'settings.clear.all-stats-confirm-content' })
+        : intl.formatMessage(
+            { id: 'settings.clear.item-stats-confirm-content' },
+            { key },
+          ),
       () => {
         if (key === null) {
           clearAllStats();
@@ -171,7 +223,12 @@ const SettingsPage: React.FC = () => {
           clearPageStats(key);
         }
         message.success(
-          key === null ? '所有统计已清空' : `所有 ${key} 统计已清空`,
+          key === null
+            ? intl.formatMessage({ id: 'settings.clear.stats.success' })
+            : intl.formatMessage(
+                { id: 'settings.clear.stats-item.success' },
+                { key },
+              ),
         );
         refreshData();
       },
@@ -179,12 +236,18 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <PageContainer title="系统设置项目管理">
-      <ProCard title="全局数据操作" gutter={[16, 16]} wrap ghost>
+    <PageContainer title={intl.formatMessage({ id: 'settings.title' })}>
+      <ProCard
+        title={intl.formatMessage({ id: 'settings.global-actions' })}
+        gutter={[16, 16]}
+        wrap
+        ghost
+      >
         <ProCard
           title={
             <>
-              <DownloadOutlined /> 导出数据
+              <DownloadOutlined />{' '}
+              {intl.formatMessage({ id: 'settings.export.title' })}
             </>
           }
           colSpan={{ xs: 24, sm: 12, md: 8 }}
@@ -196,26 +259,27 @@ const SettingsPage: React.FC = () => {
               icon={<DatabaseOutlined />}
               onClick={() => handleExportAll(null)}
             >
-              全量导出 (配置+统计)
+              {intl.formatMessage({ id: 'settings.export.all' })}
             </Button>
             <Button
               icon={<CodeOutlined />}
               onClick={() => handleExportConfig(null)}
             >
-              仅导出配置 (mta:cfg)
+              {intl.formatMessage({ id: 'settings.export.config' })}
             </Button>
             <Button
               icon={<BarChartOutlined />}
               onClick={() => handleExportStats(null)}
             >
-              仅导出统计 (mta:sta)
+              {intl.formatMessage({ id: 'settings.export.stats' })}
             </Button>
           </Space>
         </ProCard>
         <ProCard
           title={
             <>
-              <UploadOutlined /> 导入数据
+              <UploadOutlined />{' '}
+              {intl.formatMessage({ id: 'settings.import.title' })}
             </>
           }
           colSpan={{ xs: 24, sm: 12, md: 8 }}
@@ -228,14 +292,15 @@ const SettingsPage: React.FC = () => {
             accept=".json"
           >
             <Button icon={<UploadOutlined />} type="primary">
-              开始导入 (JSON)
+              {intl.formatMessage({ id: 'settings.import.button' })}
             </Button>
           </Upload>
         </ProCard>
         <ProCard
           title={
             <>
-              <DeleteOutlined /> 清理数据
+              <DeleteOutlined />{' '}
+              {intl.formatMessage({ id: 'settings.clear.title' })}
             </>
           }
           colSpan={{ xs: 24, sm: 12, md: 8 }}
@@ -248,32 +313,37 @@ const SettingsPage: React.FC = () => {
               danger
               onClick={() => handleClearAll(null)}
             >
-              清理全量
+              {intl.formatMessage({ id: 'settings.clear.all' })}
             </Button>
             <Button
               icon={<DeleteOutlined />}
               danger
               onClick={() => handleClearConfig(null)}
             >
-              清理配置
+              {intl.formatMessage({ id: 'settings.clear.config' })}
             </Button>
             <Button
               icon={<BarChartOutlined />}
               danger
               onClick={() => handleClearStats(null)}
             >
-              清理统计
+              {intl.formatMessage({ id: 'settings.clear.stats' })}
             </Button>
           </Space>
         </ProCard>
       </ProCard>
 
-      <ProCard title="功能项操作" gutter={[16, 16]} wrap ghost>
+      <ProCard
+        title={intl.formatMessage({ id: 'settings.item-actions' })}
+        gutter={[16, 16]}
+        wrap
+        ghost
+      >
         {CONFIG_kEY_LIST.map(({ key, name }) => {
           const item = settings[key];
           return (
             <ProCard
-              title={name}
+              title={intl.formatMessage({ id: name })}
               colSpan={{ xs: 24, sm: 12, md: 8 }}
               layout="center"
               bordered
@@ -287,19 +357,25 @@ const SettingsPage: React.FC = () => {
                       icon={<DatabaseOutlined />}
                       onClick={() => handleExportAll(key)}
                     >
-                      全量导出 (配置+统计)
+                      {intl.formatMessage({ id: 'settings.export.all' })}
                     </Button>
                     <Button
                       icon={<CodeOutlined />}
                       onClick={() => handleExportConfig(key)}
                     >
-                      导出配置 (mta:cfg)
+                      {intl.formatMessage(
+                        { id: 'settings.export.config.success' },
+                        { key: 'mta:cfg' },
+                      )}
                     </Button>
                     <Button
                       icon={<BarChartOutlined />}
                       onClick={() => handleExportStats(key)}
                     >
-                      导出统计 (mta:sta)
+                      {intl.formatMessage(
+                        { id: 'settings.export.stats-item.success' },
+                        { key: 'mta:sta' },
+                      )}
                     </Button>
                   </Space>
                 </Col>
@@ -310,21 +386,21 @@ const SettingsPage: React.FC = () => {
                       danger
                       onClick={() => handleClearAll(key)}
                     >
-                      清理全量 (配置+统计)
+                      {intl.formatMessage({ id: 'settings.clear.all' })}
                     </Button>
                     <Button
                       icon={<DeleteOutlined />}
                       danger
                       onClick={() => handleClearConfig(key)}
                     >
-                      清理配置 (mta:cfg)
+                      {intl.formatMessage({ id: 'settings.clear.config' })}
                     </Button>
                     <Button
                       icon={<BarChartOutlined />}
                       danger
                       onClick={() => handleClearStats(key)}
                     >
-                      清理统计 (mta:sta)
+                      {intl.formatMessage({ id: 'settings.clear.stats' })}
                     </Button>
                   </Space>
                 </Col>
@@ -332,7 +408,7 @@ const SettingsPage: React.FC = () => {
                   <ConfigItemEditor
                     key={key}
                     storageKey={key}
-                    name={name}
+                    name={intl.formatMessage({ id: name })}
                     initialValue={item?.value ?? {}}
                     onSaved={refreshData}
                   />

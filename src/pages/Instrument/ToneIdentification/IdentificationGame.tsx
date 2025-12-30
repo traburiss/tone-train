@@ -3,6 +3,7 @@ import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
 import { CHORD_FINGERINGS, getChordNotes } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
 import { SoundOutlined } from '@ant-design/icons';
+import { useIntl } from '@umijs/max';
 import { Button, Modal, Progress, message } from 'antd';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as Tone from 'tone';
@@ -33,6 +34,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPreparing, setIsPreparing] = useState(true);
   const [isCorrect, setIsCorrect] = useState(false);
+  const intl = useIntl();
 
   const startTimeRef = useRef<number>(0);
   const questionStartTimeRef = useRef<number>(0);
@@ -72,7 +74,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
 
   const nextQuestion = () => {
     if (flattenTones.length === 0) {
-      message.error('未选择任何音阶或和弦');
+      message.error(intl.formatMessage({ id: 'game.error.no-tones' }));
       onCancel();
       return;
     }
@@ -133,7 +135,12 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           const newCount = c + 1;
           if (newCount % 3 === 0 && settings.mode === 'timed') {
             setTimeLeft((t) => t + 5); // Reward 5 seconds
-            message.success('连对3次，时间+5s！');
+            message.success(
+              intl.formatMessage(
+                { id: 'game.success.combo' },
+                { count: newCount, bonus: 5 },
+              ),
+            );
           }
           return newCount;
         });
@@ -185,12 +192,27 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
     }
 
     Modal.info({
-      title: '测试结束',
+      title: intl.formatMessage({ id: 'game.over.title' }),
       content: (
         <div>
-          <p>正确数量: {correctCount}</p>
-          <p>准确率: {(stats.accuracy * 100).toFixed(1)}%</p>
-          <p>平均用时: {stats.avgResponseTime.toFixed(2)}s</p>
+          <p>
+            {intl.formatMessage(
+              { id: 'game.over.correct-count' },
+              { count: correctCount },
+            )}
+          </p>
+          <p>
+            {intl.formatMessage(
+              { id: 'game.over.accuracy' },
+              { accuracy: (stats.accuracy * 100).toFixed(1) },
+            )}
+          </p>
+          <p>
+            {intl.formatMessage(
+              { id: 'game.over.avg-time' },
+              { time: stats.avgResponseTime.toFixed(2) },
+            )}
+          </p>
         </div>
       ),
       onOk: onCancel,
@@ -200,7 +222,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
   const handleCancel = () => {
     if (sessionStatsRef.current.length > 0) {
       saveStats();
-      message.info('测试已中断，进度已记录');
+      message.info(intl.formatMessage({ id: 'game.cancel.info' }));
     }
     onCancel();
   };
@@ -216,7 +238,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
         timerRef.current = setInterval(() => {
           setTimeLeft((t) => {
             if (t <= 1) {
-              clearInterval(timerRef.current!);
+              if (timerRef.current) clearInterval(timerRef.current);
               handleGameOver();
               return 0;
             }
@@ -242,12 +264,17 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
       title={
         <div className="flex justify-between items-center pr-8">
           <span>
-            听音判断 - {settings.mode === 'timed' ? '限时挑战' : '无限模式'}
+            {intl.formatMessage({ id: 'game.title.prefix' })}
+            {settings.mode === 'timed'
+              ? intl.formatMessage({ id: 'tone-identification.mode.timed' })
+              : intl.formatMessage({
+                  id: 'tone-identification.mode.infinite',
+                })}
           </span>
           {settings.mode === 'timed' && (
             <div className="flex items-center gap-2">
               <span className={timeLeft < 10 ? 'text-red-500 font-bold' : ''}>
-                倒计时: {timeLeft}s
+                {intl.formatMessage({ id: 'game.time-left' }, { time: timeLeft })}
               </span>
               <Progress
                 type="circle"
@@ -273,14 +300,14 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
             onClick={() => currentTone && playSound(currentTone)}
             loading={isPlaying || isPreparing}
           >
-            重放声音
+            {intl.formatMessage({ id: 'game.replay-sound' })}
           </Button>
           <div className="mt-2 text-gray-400 text-xs">
             {isPreparing
-              ? '正在准备音色...'
+              ? intl.formatMessage({ id: 'game.preparing-instrument' })
               : status === 'loaded'
-                ? '音色已就绪'
-                : '音色加载中，暂用模拟音'}
+                ? intl.formatMessage({ id: 'game.instrument-ready' })
+                : intl.formatMessage({ id: 'game.instrument-loading-midi' })}
           </div>
         </div>
 
@@ -343,19 +370,34 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
         </div>
 
         <div className="flex justify-between text-gray-500 border-t pt-4">
-          <span>正确次数: {correctCount}</span>
-          <span>连对奖励: {consecutiveCorrect}</span>
           <span>
-            准确率:{' '}
-            {totalAttempts > 0
-              ? ((correctCount / totalAttempts) * 100).toFixed(0)
-              : 0}
-            %
+            {intl.formatMessage(
+              { id: 'game.correct-count-title' },
+              { count: correctCount },
+            )}
+          </span>
+          <span>
+            {intl.formatMessage(
+              { id: 'game.combo-bonus' },
+              { count: consecutiveCorrect },
+            )}
+          </span>
+          <span>
+            {intl.formatMessage(
+              { id: 'game.accuracy-title' },
+              {
+                accuracy:
+                  totalAttempts > 0
+                    ? ((correctCount / totalAttempts) * 100).toFixed(0)
+                    : 0,
+              },
+            )}
           </span>
         </div>
       </div>
     </Modal>
   );
 };
+
 
 export default IdentificationGame;

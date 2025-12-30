@@ -1,8 +1,8 @@
 import {
-  DURATION_FORMATTER,
-  DURATION_STEP,
+  GET_DURATION_FORMATTER,
   MAX_DURATION,
   MIX_DURATION,
+  DURATION_STEP,
 } from '@/constants';
 import {
   ProForm,
@@ -10,51 +10,67 @@ import {
   ProFormSlider,
   ProFormSwitch,
 } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
 import { Card } from 'antd';
 import React from 'react';
 
 const PlaybackSettings: React.FC = () => {
+  const intl = useIntl();
+  const durationFormatter = GET_DURATION_FORMATTER(intl);
+
   return (
-    <Card title="播放配置" className="mb-3 sm:mb-6">
-      <ProForm.Group title="时间设置">
+    <Card
+      title={intl.formatMessage({ id: 'common.playback-settings' })}
+      className="mb-3 sm:mb-6"
+    >
+      <ProForm.Group
+        title={intl.formatMessage({ id: 'common.time-settings' })}
+      >
         <ProFormSlider
           name="toneDuration"
-          label="音阶时长"
+          label={intl.formatMessage({ id: 'common.tone-duration' })}
           width="md"
           min={MIX_DURATION}
           max={MAX_DURATION}
           step={DURATION_STEP}
-          fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+          fieldProps={{ tooltip: { formatter: durationFormatter } }}
         />
         <ProFormSlider
           name="toneWait"
-          label="音阶播后等待"
+          label={intl.formatMessage({ id: 'common.tone-wait' })}
           width="md"
           min={MIX_DURATION}
           max={MAX_DURATION}
           step={DURATION_STEP}
-          fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+          fieldProps={{ tooltip: { formatter: durationFormatter } }}
         />
       </ProForm.Group>
 
-      <ProForm.Group title="音名播报设置">
+      <ProForm.Group
+        title={intl.formatMessage({ id: 'common.tts-settings' })}
+      >
         <ProFormSwitch
           name="ttsEnable"
-          label="语音报音名"
-          tooltip="每次结束后播报音名"
+          label={intl.formatMessage({ id: 'common.tts-enable' })}
+          tooltip={intl.formatMessage({ id: 'common.tts-enable.tooltip' })}
         />
         <ProFormDependency name={['ttsEnable']}>
           {({ ttsEnable }) =>
             ttsEnable && (
               <ProFormSlider
                 name="ttsRate"
-                label="报音阶语速"
-                tooltip="倍数越大越慢"
+                label={intl.formatMessage({ id: 'common.tts-rate' })}
+                tooltip={intl.formatMessage({ id: 'common.tts-rate.tooltip' })}
                 width="md"
                 min={0.5}
                 max={4.0}
                 step={0.1}
-                fieldProps={{ tooltip: { formatter: (v) => `${v}x 时长` } }}
+                fieldProps={{
+                  tooltip: {
+                    formatter: (v) =>
+                      `${v}x ${intl.formatMessage({ id: 'common.tone-duration' })}`,
+                  },
+                }}
               />
             )
           }
@@ -65,12 +81,12 @@ const PlaybackSettings: React.FC = () => {
             ttsEnable && (
               <ProFormSlider
                 name="ttsWait"
-                label="报音名后等待"
+                label={intl.formatMessage({ id: 'common.tts-wait' })}
                 width="md"
                 min={MIX_DURATION}
                 max={MAX_DURATION}
                 step={DURATION_STEP}
-                fieldProps={{ tooltip: { formatter: DURATION_FORMATTER } }}
+                fieldProps={{ tooltip: { formatter: durationFormatter } }}
               />
             )
           }
@@ -82,21 +98,25 @@ const PlaybackSettings: React.FC = () => {
             <ProForm.Group>
               <ProFormSwitch
                 name="ttsSolfege"
-                label="额外报唱名"
-                tooltip="报完音名后，追加唱名（如：Do）"
+                label={intl.formatMessage({ id: 'common.tts-solfege' })}
+                tooltip={intl.formatMessage({
+                  id: 'common.tts-solfege.tooltip',
+                })}
               />
               <ProFormDependency name={['ttsSolfege']}>
                 {({ ttsSolfege }) =>
                   ttsSolfege && (
                     <ProFormSlider
                       name="ttsSolfegeWait"
-                      label="唱名间隔"
+                      label={intl.formatMessage({
+                        id: 'common.tts-solfege-wait',
+                      })}
                       width="sm"
                       min={MIX_DURATION}
                       max={MAX_DURATION}
                       step={DURATION_STEP}
                       fieldProps={{
-                        tooltip: { formatter: DURATION_FORMATTER },
+                        tooltip: { formatter: durationFormatter },
                       }}
                     />
                   )
@@ -112,21 +132,25 @@ const PlaybackSettings: React.FC = () => {
             <ProForm.Group>
               <ProFormSwitch
                 name="ttsNotation"
-                label="额外报简谱"
-                tooltip="报完音名后，追加简谱记号（如：1）"
+                label={intl.formatMessage({ id: 'common.tts-notation' })}
+                tooltip={intl.formatMessage({
+                  id: 'common.tts-notation.tooltip',
+                })}
               />
               <ProFormDependency name={['ttsNotation']}>
                 {({ ttsNotation }) =>
                   ttsNotation && (
                     <ProFormSlider
                       name="ttsNotationWait"
-                      label="简谱间隔"
+                      label={intl.formatMessage({
+                        id: 'common.tts-notation-wait',
+                      })}
                       width="sm"
                       min={MIX_DURATION}
                       max={MAX_DURATION}
                       step={DURATION_STEP}
                       fieldProps={{
-                        tooltip: { formatter: DURATION_FORMATTER },
+                        tooltip: { formatter: durationFormatter },
                       }}
                     />
                   )
