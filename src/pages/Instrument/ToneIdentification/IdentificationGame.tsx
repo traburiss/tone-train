@@ -32,6 +32,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
   const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPreparing, setIsPreparing] = useState(true);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const startTimeRef = useRef<number>(0);
   const questionStartTimeRef = useRef<number>(0);
@@ -81,6 +82,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
       flattenTones[Math.floor(Math.random() * flattenTones.length)];
     setCurrentTone(target);
     setWrongOptions([]);
+    setIsCorrect(false);
 
     // Generate options
     const candidates = [target];
@@ -139,7 +141,8 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
         setConsecutiveCorrect(0);
       }
 
-      setTimeout(nextQuestion, settings.toneWait || 0);
+      setIsCorrect(true);
+      setTimeout(nextQuestion, settings.toneWait || 1000);
     } else {
       // Wrong
       if (!wrongOptions.includes(selected)) {
@@ -286,27 +289,39 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
         >
           {options.map((opt) => {
-            const isWrong = wrongOptions.includes(opt);
+            const isAnsweredCorrectly = isCorrect && opt === currentTone;
+            const isAnsweredWrong = wrongOptions.includes(opt);
+            const isOtherAfterCorrect = isCorrect && opt !== currentTone;
             const isChord = settings.toneType === 'GuitarChords';
+
             return (
               <div
                 key={opt}
                 className={`
-                  flex flex-col items-center justify-center p-0.5 border rounded transition-all cursor-pointer select-none
-                  h-24 overflow-hidden
+                  flex flex-col items-center justify-center p-0.5 border rounded transition-all select-none overflow-hidden
                   ${
-                    isWrong
-                      ? 'bg-gray-50 border-gray-100 opacity-10 cursor-not-allowed'
-                      : 'bg-white border-blue-50 shadow-sm hover:border-blue-300 active:scale-95'
+                    isAnsweredCorrectly
+                      ? 'bg-green-50 border-green-500 shadow-md scale-105 z-10'
+                      : isAnsweredWrong
+                        ? 'bg-red-50 border-red-200 opacity-60 cursor-not-allowed'
+                        : isOtherAfterCorrect
+                          ? 'bg-gray-50 border-gray-100 opacity-30 cursor-not-allowed'
+                          : 'bg-white border-blue-50 shadow-sm hover:border-blue-300 active:scale-95 cursor-pointer'
                   }
                 `}
-                onClick={() => !isWrong && handleSelect(opt)}
+                onClick={() =>
+                  !isAnsweredWrong && !isCorrect && handleSelect(opt)
+                }
               >
                 <div
                   className={`font-bold truncate w-full text-center leading-tight ${
-                    isChord
-                      ? 'text-[10px] text-gray-400'
-                      : 'text-sm text-gray-700'
+                    isAnsweredCorrectly
+                      ? 'text-green-600 text-sm'
+                      : isAnsweredWrong
+                        ? 'text-red-500'
+                        : isChord
+                          ? 'text-[10px] text-gray-400'
+                          : 'text-sm text-gray-700'
                   }`}
                 >
                   {opt}

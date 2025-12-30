@@ -65,6 +65,14 @@
     padding: 0 !important;
   }
 
+  /* Reduce PageContainer header padding on mobile */
+  .ant-pro-page-container .ant-pro-page-container-warp-page-header {
+    padding-block-start: 2px;
+    padding-block-end: 2px;
+    padding-inline-start: 12px;
+    padding-inline-end: 2px;
+  }
+
   /* Force all cards to be more compact on mobile */
   .ant-card {
     margin-bottom: 8px !important;

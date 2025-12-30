@@ -29,8 +29,8 @@ const HomePage: React.FC = () => {
           }
         >
           <div className="text-gray-500 text-center py-4">
-            <div>磨耳朵，提升听感</div>
-            <div className="mt-2 text-xs">支持和弦、单音等多种训练模式</div>
+            <div>磨耳朵，提升音感</div>
+            <div className="mt-2 text-xs">通过反复聆听和弦与单音，提高自己的音感；支持和弦、单音等多种训练模式</div>
           </div>
         </ProCard>
         <ProCard
@@ -50,7 +50,7 @@ const HomePage: React.FC = () => {
         >
           <div className="text-gray-500 text-center py-4">
             <div>练习辨音，挑战自我</div>
-            <div className="mt-2 text-xs">支持多种难度和限时挑战模式</div>
+            <div className="mt-2 text-xs">通过听音后从多个选项中选出正确和弦/单音的模式，提高自己对和弦与单音的音感；支持多种难度和限时挑战模式</div>
           </div>
         </ProCard>
       </ProCard>

@@ -29,6 +29,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const [paused, setPaused] = useState<boolean>(true);
   const [loading, setLoading] = useState(false);
   const [currentTone, setCurrentTone] = useState<string>('...');
+  const [showResult, setShowResult] = useState<boolean>(false);
   const [, contextHolder] = notification.useNotification();
 
   // Ref to track the sequential index (0 to length-1) across intervals
@@ -37,7 +38,38 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
   const loopCountRef = React.useRef(0);
 
   const say = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
+    let processedText = text;
+
+    // Mapping for Solfege to ensure standard musical pronunciation
+    const SOLFEGE_MAP: Record<string, string> = {
+      Do: 'Duo',
+      Re: 'Rui',
+      // Mi stays Mi
+      Fa: 'Fa',
+      Sol: 'Suo',
+      La: 'La',
+      Si: 'Xi',
+      升: 'Sheng ',
+      降: 'Jiang ',
+    };
+
+    // Handle Solfege transformations
+    Object.entries(SOLFEGE_MAP).forEach(([key, value]) => {
+      const regex = new RegExp(key, 'g');
+      processedText = processedText.replace(regex, value);
+    });
+
+    // Transform musical terms for better TTS pronunciation
+    processedText = processedText
+      .replace(/#/g, ' sharp')
+      .replace(/m($|7)/g, ' minor$1') // Am -> A minor, Am7 -> A minor 7
+      .replace(/maj/g, ' major ')
+      .replace(/sus/g, ' suspended ')
+      .replace(/\//g, ' over ')
+      .replace(/([A-G])(\d)/g, '$1 $2') // "C 4" instead of "C4", but keeps "Duo" intact
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(processedText);
     // User requested "operation reversed" (larger value = slower)
     // So we treat ttsRate as "Slowness Factor" or "Duration Multiplier"
     // Rate = 1 / Factor.
@@ -89,11 +121,13 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     if (props.ttsEnable) {
       // Estimate 1s per speech utterance to be safe + configured waits
       ttsExtra += 1000;
-      if (props.ttsSolfege) {
-        ttsExtra += (props.ttsSolfegeWait || 0) + 1000;
-      }
-      if (props.ttsNotation) {
-        ttsExtra += (props.ttsNotationWait || 0) + 1000;
+      if (propsRef.current.toneType !== 'GuitarChords') {
+        if (props.ttsSolfege) {
+          ttsExtra += (props.ttsSolfegeWait || 0) + 1000;
+        }
+        if (props.ttsNotation) {
+          ttsExtra += (props.ttsNotationWait || 0) + 1000;
+        }
       }
     }
 
@@ -142,6 +176,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
 
       // 3. Update State for Display
       setCurrentTone(tone);
+      setShowResult(false);
 
       // 4. Update Sequential Logic for NEXT time
       if (!currentProps.random) {
@@ -189,6 +224,10 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       await playTone(tone, currentProps.toneDuration);
 
       if (isCancelled) return;
+      if (!currentProps.ttsEnable) {
+        setShowResult(true);
+      }
+
       if (isCancelled) return;
       if (currentProps.ttsEnable) {
         // Sequential TTS logic
@@ -199,8 +238,13 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         if (isCancelled) return;
 
         // 2. Speak Tone Name
+        setShowResult(true);
         say(tone);
 
+        // 吉他不需要播放唱名和简谱
+        if (propsRef.current.toneType === 'GuitarChords') {
+          return;
+        }
         // 3. Solfege
         if (currentProps.ttsSolfege) {
           await new Promise((r) => {
@@ -250,6 +294,7 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       seqIndexRef.current = 0;
       loopCountRef.current = 0;
       setCurrentTone('...');
+      setShowResult(false);
 
       // Optimistic UI: Start with Synth immediately
       setLoading(false);
@@ -334,11 +379,11 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
           title={getHintTitle()}
           subTitle={
             <div className="text-2xl sm:text-4xl flex items-center justify-center gap-2">
-              {currentTone}
+              {showResult ? currentTone : '?'}
             </div>
           }
           icon={
-            CHORD_FINGERINGS[currentTone] ? (
+            showResult && CHORD_FINGERINGS[currentTone] ? (
               <div className="flex justify-center">
                 <ChordDiagram
                   name={currentTone}
@@ -348,7 +393,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
                 />
               </div>
             ) : (
-              <SoundOutlined />
+              <div className="flex items-center justify-center h-[140px]">
+                <SoundOutlined className="text-6xl text-blue-400 animate-pulse" />
+              </div>
             )
           }
         />

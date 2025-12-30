@@ -176,8 +176,8 @@ const Practice: React.FC = () => {
                 radioType="button"
                 fieldProps={{ buttonStyle: 'solid', size: 'small' }}
                 options={[
-                  { label: '限时挑战', value: 'timed' },
                   { label: '无限模式', value: 'infinite' },
+                  { label: '限时挑战', value: 'timed' },
                 ]}
               />
 
@@ -190,7 +190,7 @@ const Practice: React.FC = () => {
                       width="xs"
                       min={10}
                       fieldProps={{
-                        step: 30,
+                        step: 10,
                       }}
                     />
                   )

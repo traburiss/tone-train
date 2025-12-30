@@ -139,10 +139,8 @@ const HomePage: React.FC = () => {
 
   return (
     <PageContainer
-      ghost
-      className="px-1 sm:px-4"
       header={{
-        title: '',
+        title: '听音训练',
       }}
     >
       <ProForm
