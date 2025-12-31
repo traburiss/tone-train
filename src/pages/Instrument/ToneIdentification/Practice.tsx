@@ -129,7 +129,9 @@ const Practice: React.FC = () => {
         <ScaleSettings />
 
         <Card
-          title={intl.formatMessage({ id: 'tone-identification.test-settings' })}
+          title={intl.formatMessage({
+            id: 'tone-identification.test-settings',
+          })}
           className="mb-6"
         >
           <div className="flex flex-col gap-6">
@@ -140,7 +142,7 @@ const Practice: React.FC = () => {
                   id: 'tone-identification.instrument',
                 })}
                 radioType="button"
-                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
+                fieldProps={{ buttonStyle: 'solid', size: 'middle' }}
                 options={INSTRUMENT_NAME_OPTIONS.map((opt) => ({
                   ...opt,
                   label: intl.formatMessage({ id: opt.label }),
@@ -152,7 +154,7 @@ const Practice: React.FC = () => {
                   id: 'tone-identification.difficulty',
                 })}
                 radioType="button"
-                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
+                fieldProps={{ buttonStyle: 'solid', size: 'middle' }}
                 options={[
                   {
                     label: intl.formatMessage({
@@ -216,7 +218,7 @@ const Practice: React.FC = () => {
                 name="mode"
                 label={intl.formatMessage({ id: 'tone-identification.mode' })}
                 radioType="button"
-                fieldProps={{ buttonStyle: 'solid', size: 'small' }}
+                fieldProps={{ buttonStyle: 'solid', size: 'middle' }}
                 options={[
                   {
                     label: intl.formatMessage({
@@ -254,7 +256,6 @@ const Practice: React.FC = () => {
           </div>
         </Card>
       </ProForm>
-
 
       {gameArgs && (
         <IdentificationGame

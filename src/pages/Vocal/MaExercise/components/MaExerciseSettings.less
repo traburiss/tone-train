@@ -1,0 +1,25 @@
+@import '@/styles/mobile.less';
+
+@layer components {
+  .settings-container {
+    @apply flex flex-col gap-6;
+  }
+
+  .settings-card .ant-card-body {
+    @apply !px-6 !py-4;
+  }
+
+  .settings-row {
+    @apply flex flex-row flex-wrap gap-4 w-full;
+  }
+
+  .range-divider {
+    @apply mt-6;
+  }
+
+  @media (min-width: 640px) {
+    .range-divider {
+      display: none;
+    }
+  }
+}

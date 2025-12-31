@@ -1,4 +1,5 @@
 import {
+  AudioOutlined,
   CustomerServiceOutlined,
   SettingOutlined,
   SoundOutlined,
@@ -20,7 +21,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 12, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable
@@ -48,7 +49,7 @@ const HomePage: React.FC = () => {
           </div>
         </ProCard>
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 12, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable
@@ -80,6 +81,46 @@ const HomePage: React.FC = () => {
           </div>
         </ProCard>
       </ProCard>
+
+      <ProCard
+        ghost
+        gutter={[16, 16]}
+        wrap
+        title={intl.formatMessage({ id: 'menu.vocal' })}
+        style={{ marginBlockStart: 24 }}
+      >
+        <ProCard
+          colSpan={{ xs: 12, sm: 12, md: 8 }}
+          layout="center"
+          bordered
+          hoverable
+          onClick={() => {
+            history.push('/vocal/ma-exercise');
+          }}
+          title={
+            <div className="flex items-center gap-2">
+              <AudioOutlined className="text-red-500" />
+              <span>
+                {intl.formatMessage({ id: 'menu.vocal.ma-exercise' })}
+              </span>
+            </div>
+          }
+        >
+          <div className="text-gray-500 text-center py-4">
+            <div>
+              {intl.formatMessage({
+                id: 'home.training.vocal.ma-exercise.subtitle',
+              })}
+            </div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({
+                id: 'home.training.vocal.ma-exercise.desc',
+              })}
+            </div>
+          </div>
+        </ProCard>
+      </ProCard>
+
       <ProCard
         ghost
         gutter={[16, 16]}
@@ -88,7 +129,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 12, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable

@@ -7,14 +7,12 @@ import {
   getNoteDetails,
 } from '@/utils/musicTheory';
 import { loadInstrument } from '@/utils/toneInstruments';
-import { ExclamationCircleFilled, SoundOutlined } from '@ant-design/icons';
+import { SoundOutlined } from '@ant-design/icons';
 import { useIntl } from '@umijs/max';
 import { Modal, notification, Result } from 'antd';
 import React, { useEffect, useState } from 'react';
 import * as Tone from 'tone';
 import styles from './trainPlayer.less';
-
-const { confirm } = Modal;
 
 export declare type TrainPlayerProps = TrainPlayerArgs & {
   open: boolean;
@@ -319,23 +317,6 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
     setPaused(!paused);
   };
 
-  const confirmCancel = () => {
-    setPaused(true);
-    confirm({
-      title: intl.formatMessage({ id: 'tone-training.stop.confirm-title' }),
-      icon: <ExclamationCircleFilled />,
-      content: intl.formatMessage({ id: 'tone-training.stop.confirm-content' }),
-      okText: intl.formatMessage({ id: 'common.confirm-close' }),
-      cancelText: intl.formatMessage({ id: 'common.cancel-mistake' }),
-      onOk() {
-        props.onCancel();
-      },
-      onCancel() {
-        setPaused(false);
-      },
-    });
-  };
-
   const { status } = useInstrumentStatus(props.instrumentName);
 
   const getHintTitle = () => {
@@ -344,7 +325,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         <>
           <div>{intl.formatMessage({ id: 'tone-training.current-tone' })}</div>
           <div className="text-yellow-600 text-sm">
-            {intl.formatMessage({ id: 'tone-training.instrument-loading-hint' })}
+            {intl.formatMessage({
+              id: 'tone-training.instrument-loading-hint',
+            })}
           </div>
         </>
       );
@@ -367,9 +350,10 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
       {contextHolder}
       <Modal
         open={props.open}
-        destroyOnHidden={true}
-        width={'80%'}
-        height={'80%'}
+        destroyOnHidden
+        width="90%"
+        style={{ maxWidth: 800 }}
+        centered
         maskClosable={false}
         okText={
           paused
@@ -378,7 +362,9 @@ const TrainPlayer: React.FC<TrainPlayerProps> = (props: TrainPlayerProps) => {
         }
         onOk={pauseTrain}
         cancelText={intl.formatMessage({ id: 'tone-training.stop' })}
-        onCancel={confirmCancel}
+        onCancel={() => {
+          props.onCancel();
+        }}
         loading={loading}
         title={
           loading

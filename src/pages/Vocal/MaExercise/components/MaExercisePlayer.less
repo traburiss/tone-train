@@ -1,0 +1,138 @@
+@import '@/styles/mobile.less';
+
+.ma-exercise-player-container {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  gap: 32px;
+  width: 100%;
+  min-height: 480px;
+}
+
+.countdown-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 95%);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.countdown-number {
+  margin: 0 !important;
+  font-size: 120px !important;
+}
+
+.countdown-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.loading-container {
+  padding: 48px;
+  text-align: center;
+}
+
+.player-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  gap: 32px;
+  width: 100%;
+}
+
+.display-area {
+  padding-left: 24px;
+  padding-right: 24px;
+  width: 100%;
+}
+
+.display-card {
+  border-radius: 8px;
+  padding: 24px;
+  border: none;
+}
+
+.display-title {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 48px;
+}
+
+.display-tip {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 700; /* font-bold */
+  display: block;
+  min-height: 27px;
+}
+
+.visualization-area {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px; /* gap-3 */
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.visualization-ready {
+  margin: 0 !important;
+  letter-spacing: 0.1em; /* tracking-widest */
+}
+
+.note-circle {
+  width: 3.5rem; /* w-14 */
+  height: 3.5rem; /* h-14 */
+  border-radius: 9999px; /* rounded-full */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  border-width: 2px;
+  border-style: solid;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+}
+
+.note-circle-active {
+  transform: scale(1.25); /* scale-125 */
+  z-index: 2;
+}
+
+.controls-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.current-note-name {
+  font-weight: 800; /* font-extrabold */
+  font-family: monospace; /* font-mono */
+  line-height: 1;
+  font-size: 64px;
+}
+
+.stop-button {
+  height: 3rem !important; /* h-12 */
+  padding-left: 2rem !important; /* px-8 */
+  padding-right: 2rem !important;
+}
+
+:global(.ant-modal-content) {
+  padding: 0 !important;
+  overflow: hidden;
+}

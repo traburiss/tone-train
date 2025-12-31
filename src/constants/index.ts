@@ -100,9 +100,9 @@ export const DEFAULT_TONE_LIST = ['C', 'D', 'G', 'A', 'Em', 'Am', 'Dm'];
 
 export const LOOP_COUNT_OPTIONS = [
   { label: 'option.loop-count.infinite', value: '0' },
-  { label: '20次', value: '20' },
-  { label: '50次', value: '50' },
-  { label: '200次', value: '200' },
+  { label: 'option.loop-count.n-times', value: '20' },
+  { label: 'option.loop-count.n-times', value: '50' },
+  { label: 'option.loop-count.n-times', value: '200' },
   { label: 'option.loop-count.custom', value: 'custom' },
 ];
 
@@ -120,26 +120,29 @@ export const GET_DURATION_FORMATTER = (intl: any): Formatter => {
   return (value: any) => {
     const ms = Number(value);
     if (isNaN(ms)) return `${value}`;
-
-    const seconds = Math.floor(ms / 1000);
-    let timeStr = '';
-
-    const secLabel = intl.formatMessage({ id: 'formatter.second' });
-    const minLabel = intl.formatMessage({ id: 'formatter.minute' });
     const msLabel = intl.formatMessage({ id: 'formatter.millisecond' });
-
-    if (seconds < 60) {
-      timeStr = `${seconds}${secLabel}`;
-    } else {
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      timeStr = `${minutes}${minLabel}`;
-      if (remainingSeconds > 0) {
-        timeStr += `${remainingSeconds}${secLabel}`;
-      }
+    if (ms < 1000) {
+      return `${ms}${msLabel}`;
     }
 
-    return `${ms} ${msLabel} (${timeStr})`;
+    const seconds = Math.floor(ms / 1000);
+    const remainingMs = ms % 1000;
+    const secLabel = intl.formatMessage({ id: 'formatter.second' });
+
+    if (seconds < 60) {
+      if (remainingMs === 0) {
+        return `${seconds}${secLabel}`;
+      }
+      return `${seconds}${secLabel}${remainingMs}${msLabel}`;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const minLabel = intl.formatMessage({ id: 'formatter.minute' });
+    if (remainingSeconds === 0 && remainingMs === 0) {
+      return `${minutes}${minLabel}${remainingMs}${msLabel}`;
+    }
+    return `${minutes}${minLabel}${remainingSeconds}${secLabel}${remainingMs}${msLabel}`;
   };
 };
 
@@ -221,6 +224,7 @@ export const STATS_PREFIX = 'mta:sta:';
 
 export const TONES_TRAINING_STORAGE_KEY = 'tones:training';
 export const TONES_IDENTIFICATION_STORAGE_KEY = 'tones:identification';
+export const VOCAL_MA_EXERCISE_STORAGE_KEY = 'vocal:ma-exercise';
 
 export const CONFIG_kEY_LIST = [
   {
@@ -231,5 +235,8 @@ export const CONFIG_kEY_LIST = [
     name: 'menu.instrument.tone-identification',
     key: TONES_IDENTIFICATION_STORAGE_KEY,
   },
+  {
+    name: 'vocal.ma-exercise.title',
+    key: VOCAL_MA_EXERCISE_STORAGE_KEY,
+  },
 ];
-

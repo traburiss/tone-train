@@ -16,7 +16,7 @@ import {
 import { Button, Card, Form, Space } from 'antd';
 import { useIntl } from '@umijs/max';
 import React, { useState } from 'react';
-import './index.css';
+import './index.less';
 
 const ScaleSettings: React.FC = () => {
   const form = Form.useFormInstance();

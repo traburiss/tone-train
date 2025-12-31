@@ -6,16 +6,14 @@ import {
   subscribeToStatus,
 } from '@/utils/toneInstruments';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useIntl } from '@umijs/max';
 import { Tag } from 'antd';
 import React, { useEffect, useRef, useState } from 'react';
 
-const INSTRUMENT_NAMES_ZH: Record<string, string> = {
-  'guitar-acoustic': '原声吉他',
-  'guitar-electric': '电吉他',
-  piano: '钢琴',
-};
+// Instrument names are now handled by intl.formatMessage({ id: 'option.instrument.' + name })
 
 const GlobalInstrumentLoader: React.FC = () => {
+  const intl = useIntl();
   // Use generic State holding both status and progress
   const [displayState, setDisplayState] = useState<{
     status: Record<string, string>;
@@ -90,19 +88,30 @@ const GlobalInstrumentLoader: React.FC = () => {
 
   let details = '';
   if (currentLoadingName) {
-    const zhName =
-      INSTRUMENT_NAMES_ZH[currentLoadingName] || currentLoadingName;
+    const nameLabel = intl.formatMessage({
+      id: `option.instrument.${currentLoadingName}`,
+    });
     const prog = displayState.progress[currentLoadingName];
     if (prog) {
-      details = `当前加载 ${zhName} ${prog.loaded}/${prog.total}`;
+      details = intl.formatMessage(
+        { id: 'common.instrument-loading-progress' },
+        { name: nameLabel, loaded: prog.loaded, total: prog.total },
+      );
     } else {
-      details = `当前加载 ${zhName}`;
+      details = intl.formatMessage(
+        { id: 'common.instrument-loading-current' },
+        { name: nameLabel },
+      );
     }
   }
 
   return (
     <Tag icon={<LoadingOutlined />} color="processing">
-      乐器加载 {loadedInstruments}/{totalInstruments} {details}
+      {intl.formatMessage(
+        { id: 'common.instrument-loading-total' },
+        { loaded: loadedInstruments, total: totalInstruments },
+      )}{' '}
+      {details}
     </Tag>
   );
 };

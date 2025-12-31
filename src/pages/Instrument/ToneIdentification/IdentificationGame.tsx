@@ -260,7 +260,11 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
       open={open}
       onCancel={handleCancel}
       footer={null}
-      width={700}
+      destroyOnHidden
+      width="90%"
+      style={{ maxWidth: 800 }}
+      centered
+      maskClosable={false}
       title={
         <div className="flex justify-between items-center pr-8">
           <span>
@@ -274,7 +278,10 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           {settings.mode === 'timed' && (
             <div className="flex items-center gap-2">
               <span className={timeLeft < 10 ? 'text-red-500 font-bold' : ''}>
-                {intl.formatMessage({ id: 'game.time-left' }, { time: timeLeft })}
+                {intl.formatMessage(
+                  { id: 'game.time-left' },
+                  { time: timeLeft },
+                )}
               </span>
               <Progress
                 type="circle"
@@ -287,8 +294,6 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           )}
         </div>
       }
-      maskClosable={false}
-      destroyOnHidden
     >
       <div className="py-4 text-center">
         <div className="mb-8">
@@ -398,6 +403,5 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
     </Modal>
   );
 };
-
 
 export default IdentificationGame;

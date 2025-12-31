@@ -15,7 +15,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Card, Form, Space } from 'antd';
 import React, { useState } from 'react';
-import './ScaleSettings.css';
+import './ScaleSettings.less';
 
 const ScaleSettings: React.FC = () => {
   const form = Form.useFormInstance();
@@ -100,7 +100,8 @@ const ScaleSettings: React.FC = () => {
                 noStyle
                 radioType="button"
                 fieldProps={{
-                  size: 'small',
+                  buttonStyle: 'solid',
+                  size: 'middle',
                   onChange: (e) => {
                     const value = e.target.value;
                     if (value === 'GuitarChords') {

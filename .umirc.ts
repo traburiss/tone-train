@@ -24,22 +24,40 @@ export default defineConfig({
       path: '/',
       component: './Home',
       icon: 'HomeOutlined',
+      key: 'menu.home',
     },
     {
       title: 'menu.instrument',
       icon: 'CustomerServiceOutlined',
+      key: 'menu.instrument',
       routes: [
         {
           title: 'menu.instrument.tone-training',
           path: '/instrument/tone-training',
           component: './Instrument/ToneTraining',
+          key: 'menu.instrument.tone-training',
           icon: 'SoundOutlined',
         },
         {
           title: 'menu.instrument.tone-identification',
           path: '/instrument/tone-identification',
           component: './Instrument/ToneIdentification',
+          key: 'menu.instrument.tone-identification',
           icon: 'CustomerServiceOutlined',
+        },
+      ],
+    },
+    {
+      title: 'menu.vocal',
+      icon: 'AudioOutlined',
+      key: 'menu.vocal',
+      routes: [
+        {
+          title: 'menu.vocal.ma-exercise',
+          path: '/vocal/ma-exercise',
+          component: './Vocal/MaExercise',
+          key: 'menu.vocal.ma-exercise',
+          icon: 'SoundOutlined',
         },
       ],
     },
@@ -48,6 +66,7 @@ export default defineConfig({
       path: '/settings',
       icon: 'SettingOutlined',
       component: './Settings',
+      key: 'menu.settings',
     },
   ],
   npmClient: 'pnpm',

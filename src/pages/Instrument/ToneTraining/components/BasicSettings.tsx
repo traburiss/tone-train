@@ -27,9 +27,11 @@ const BasicSettings: React.FC = () => {
         <ProFormRadio.Group
           name="instrumentName"
           label={intl.formatMessage({ id: 'common.instrument-choice' })}
-          tooltip={intl.formatMessage({ id: 'common.instrument-choice.tooltip' })}
+          tooltip={intl.formatMessage({
+            id: 'common.instrument-choice.tooltip',
+          })}
           radioType="button"
-          fieldProps={{ buttonStyle: 'solid', size: 'small' }}
+          fieldProps={{ buttonStyle: 'solid', size: 'middle' }}
           options={INSTRUMENT_NAME_OPTIONS.map((opt) => ({
             ...opt,
             label: intl.formatMessage({ id: opt.label }),
@@ -43,13 +45,10 @@ const BasicSettings: React.FC = () => {
           label={intl.formatMessage({ id: 'common.loop-count' })}
           tooltip={intl.formatMessage({ id: 'common.loop-count.tooltip' })}
           radioType="button"
-          fieldProps={{ buttonStyle: 'solid', size: 'small' }}
+          fieldProps={{ buttonStyle: 'solid', size: 'middle' }}
           options={LOOP_COUNT_OPTIONS.map((opt) => ({
             ...opt,
-            label: intl.formatMessage({
-              id: opt.label,
-              defaultMessage: opt.label,
-            }),
+            label: intl.formatMessage({ id: opt.label }, { n: opt.value }),
           }))}
         />
         <ProFormDependency name={['loopCountType']}>
@@ -101,6 +100,5 @@ const BasicSettings: React.FC = () => {
     </Card>
   );
 };
-
 
 export default BasicSettings;

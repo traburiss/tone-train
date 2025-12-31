@@ -250,7 +250,7 @@ const SettingsPage: React.FC = () => {
               {intl.formatMessage({ id: 'settings.export.title' })}
             </>
           }
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, md: 8 }}
           bordered
           hoverable
         >
@@ -282,7 +282,7 @@ const SettingsPage: React.FC = () => {
               {intl.formatMessage({ id: 'settings.import.title' })}
             </>
           }
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, md: 8 }}
           bordered
           hoverable
         >
@@ -303,7 +303,7 @@ const SettingsPage: React.FC = () => {
               {intl.formatMessage({ id: 'settings.clear.title' })}
             </>
           }
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, md: 8 }}
           bordered
           hoverable
         >
@@ -344,7 +344,7 @@ const SettingsPage: React.FC = () => {
           return (
             <ProCard
               title={intl.formatMessage({ id: name })}
-              colSpan={{ xs: 24, sm: 12, md: 8 }}
+              colSpan={{ xs: 24, md: 8 }}
               layout="center"
               bordered
               hoverable
