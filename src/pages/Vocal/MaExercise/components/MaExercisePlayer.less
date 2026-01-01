@@ -63,6 +63,8 @@
   border-radius: 8px;
   padding: 24px;
   border: none;
+  background: transparent;
+  box-shadow: none !important;
 }
 
 .display-title {
@@ -72,7 +74,7 @@
 }
 
 .display-tip {
-  font-size: 1.125rem; /* text-lg */
+  font-size: 2rem; /* text-lg */
   font-weight: 700; /* font-bold */
   display: block;
   min-height: 27px;
@@ -105,11 +107,17 @@
   border-style: solid;
   transition: all 0.3s ease;
   touch-action: manipulation;
+  background: var(--ant-color-fill-secondary);
+  border-color: var(--ant-color-fill-secondary);
+  color: var(--ant-color-text);
 }
 
 .note-circle-active {
   transform: scale(1.25); /* scale-125 */
   z-index: 2;
+  background: var(--ant-color-primary);
+  border-color: var(--ant-color-primary);
+  color: #fff;
 }
 
 .controls-area {

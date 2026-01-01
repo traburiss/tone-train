@@ -1,5 +1,6 @@
 import { VOCAL_MA_EXERCISE_STORAGE_KEY } from '@/constants';
 import { getPageSettings, setPageSettings } from '@/utils/storage';
+import { loadInstrument } from '@/utils/toneInstruments';
 import {
   FooterToolbar,
   PageContainer,
@@ -40,6 +41,11 @@ const MaExercisePage: React.FC = () => {
       setSettings(saved);
       form.setFieldsValue(saved);
     }
+
+    // Preload piano instrument when entering the page
+    loadInstrument('piano').catch((e) => {
+      console.error('Failed to preload instrument:', e);
+    });
   }, [form]);
 
   const onValuesChange = (_: any, allValues: any) => {
@@ -59,6 +65,7 @@ const MaExercisePage: React.FC = () => {
     <PageContainer
       header={{
         title: intl.formatMessage({ id: 'vocal.ma-exercise.title' }),
+        subTitle: intl.formatMessage({ id: 'vocal.ma-exercise.subTitle' }),
       }}
     >
       <ProForm

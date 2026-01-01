@@ -2,6 +2,8 @@ export default {
   'menu.vocal': 'Vocal Training',
   'menu.vocal.ma-exercise': 'Vocal Exercise',
   'vocal.ma-exercise.title': 'Vocal Exercise',
+  'vocal.ma-exercise.subTitle':
+    'Sing "ma", following a descending pentatonic scale',
   'vocal.ma-exercise.start': 'Start Training',
   'vocal.ma-exercise.stop': 'Stop Training',
   'vocal.ma-exercise.pause': 'Pause Practice',

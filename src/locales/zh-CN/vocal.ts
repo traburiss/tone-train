@@ -2,6 +2,7 @@ export default {
   'menu.vocal': '声乐训练',
   'menu.vocal.ma-exercise': '发声练习',
   'vocal.ma-exercise.title': '发声练习',
+  'vocal.ma-exercise.subTitle': '唱 ma 音，按照五声音阶下行的方式演唱',
   'vocal.ma-exercise.start': '开始训练',
   'vocal.ma-exercise.stop': '停止训练',
   'vocal.ma-exercise.pause': '暂停练习',

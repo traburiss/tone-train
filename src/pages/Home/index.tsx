@@ -21,7 +21,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 12, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable
@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
           </div>
         </ProCard>
         <ProCard
-          colSpan={{ xs: 12, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable
@@ -90,7 +90,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 12, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable
@@ -129,7 +129,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 12, sm: 12, md: 8 }}
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
           layout="center"
           bordered
           hoverable

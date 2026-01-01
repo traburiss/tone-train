@@ -1,11 +1,11 @@
+import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
 import { loadInstrument } from '@/utils/toneInstruments';
 import {
   CaretRightOutlined,
-  LoadingOutlined,
   PauseOutlined,
 } from '@ant-design/icons';
 import { useIntl } from '@umijs/max';
-import { Button, Card, Modal, Space, Spin, Typography, theme } from 'antd';
+import { Button, Card, Modal, Space, Typography, theme } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import './MaExercisePlayer.less';
@@ -55,8 +55,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   const [currentNote, setCurrentNote] = useState<string>('');
   const [currentTip, setCurrentTip] = useState<string>('');
   const [currentPatternNotes, setCurrentPatternNotes] = useState<string[]>([]);
-  const samplerRef = useRef<Tone.Sampler | null>(null);
-  const [loading, setLoading] = useState(true);
+  const samplerRef = useRef<Tone.Sampler | Tone.PolySynth | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const tips = useRef([
@@ -208,43 +207,55 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
     stopExercise,
   ]);
 
+  const { status: instrumentStatus } = useInstrumentStatus('piano');
+
   const startSequence = useCallback(async () => {
-    if (!samplerRef.current) return;
+    // Resume context first
     await Tone.context.resume();
     await Tone.start();
 
-    if (countdown > 0) {
-      let count = Math.ceil(countdown / 1000); // Start from number of seconds
-      setCountdownValue(count);
-      timerRef.current = setInterval(() => {
-        count--;
-        if (count > 0) {
-          setCountdownValue(count);
-        } else {
-          setCountdownValue(null);
-          if (timerRef.current) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
+    const run = () => {
+      if (countdown > 0) {
+        let count = Math.ceil(countdown / 1000);
+        setCountdownValue(count);
+        timerRef.current = setInterval(() => {
+          count--;
+          if (count > 0) {
+            setCountdownValue(count);
+          } else {
+            setCountdownValue(null);
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+            startExercise();
           }
-          startExercise();
-        }
-      }, 1000);
+        }, 1000);
+      } else {
+        startExercise();
+      }
+    };
+
+    // Check instrument status
+    if (instrumentStatus === 'loaded') {
+      loadInstrument('piano').then((sampler) => {
+        samplerRef.current = sampler;
+        run();
+      });
     } else {
-      startExercise();
+      console.log('Instrument not loaded, falling back to synth');
+      samplerRef.current = new Tone.PolySynth(Tone.Synth).toDestination();
+      run();
     }
-  }, [countdown, startExercise]);
+  }, [countdown, startExercise, instrumentStatus]);
 
   useEffect(() => {
     if (!visible) {
       stopExercise();
       return;
     }
-    setLoading(true);
-    loadInstrument('piano').then((sampler) => {
-      samplerRef.current = sampler;
-      setLoading(false);
-      startSequence();
-    });
+    // Start sequence immediately when visible
+    startSequence();
     return () => stopExercise();
   }, [visible, startSequence, stopExercise]);
 
@@ -276,20 +287,12 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
           </div>
         )}
 
-        {loading ? (
-          <div className="loading-container">
-            <Spin
-              indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
-              tip="正在加载音色库..."
-            />
-          </div>
-        ) : (
+        {/* Main Content */}
           <Space orientation="vertical" size={32} className="player-content">
             {/* Main Display Area */}
             <div className="display-area">
               <Card
                 className="display-card"
-                style={{ background: token.colorFillQuaternary }}
                 variant="borderless"
               >
                 <Typography.Text
@@ -312,21 +315,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
                   return (
                     <div
                       key={index}
-                      className={`note-circle ${isCurrent ? 'note-circle-active' : ''}`}
-                      style={{
-                        background: isCurrent
-                          ? token.colorPrimary
-                          : token.colorFillSecondary,
-                        color: isCurrent ? '#fff' : token.colorText,
-                        borderColor:
-                          isCurrent
-                            ? token.colorPrimary
-                            : token.colorBorderSecondary,
-                        boxShadow: isCurrent
-                          ? `0 0 20px ${token.colorPrimary}4D`
-                          : 'none',
-                      }}
-                    >
+                      className={`note-circle ${isCurrent ? 'note-circle-active' : ''}`}>
                       {note}
                     </div>
                   );
@@ -366,7 +355,6 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
               </Button>
             </Space>
           </Space>
-        )}
       </div>
     </Modal>
   );
