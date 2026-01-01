@@ -34,4 +34,7 @@ export default {
   'vocal.ma-exercise.tip.6': 'Keep breath flowing smoothly, no blockage',
   'vocal.ma-exercise.tip.7': 'Keep waist and abdomen tight',
   'vocal.ma-exercise.tip.8': 'Pay attention to closure',
+  'vocal.ma-exercise.midi-warning': 'Using MIDI sound, piano sound loading...',
+  'vocal.ma-exercise.piano-loaded':
+    'Piano sound loaded, switched automatically',
 };

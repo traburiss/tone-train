@@ -33,4 +33,6 @@ export default {
   'vocal.ma-exercise.tip.6': '气息保持流畅连贯',
   'vocal.ma-exercise.tip.7': '保持腰腹核心稳定，支撑气息输出',
   'vocal.ma-exercise.tip.8': '注意声带适度闭合，避免漏气',
+  'vocal.ma-exercise.midi-warning': '正在使用 MIDI 音色，钢琴音色加载中...',
+  'vocal.ma-exercise.piano-loaded': '钢琴音色加载完成，已自动切换',
 };

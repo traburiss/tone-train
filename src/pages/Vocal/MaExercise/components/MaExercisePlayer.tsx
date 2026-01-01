@@ -1,11 +1,17 @@
 import { useInstrumentStatus } from '@/hooks/useInstrumentStatus';
 import { loadInstrument } from '@/utils/toneInstruments';
-import {
-  CaretRightOutlined,
-  PauseOutlined,
-} from '@ant-design/icons';
+import { CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 import { useIntl } from '@umijs/max';
-import { Button, Card, Modal, Space, Typography, theme } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Modal,
+  Space,
+  Typography,
+  message,
+  theme,
+} from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
 import './MaExercisePlayer.less';
@@ -45,6 +51,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [countdownValue, setCountdownValue] = useState<number | null>(null);
+  const [usingMidi, setUsingMidi] = useState(false);
 
   // Progress Tracking
   const [currentCycle, setCurrentCycle] = useState(1);
@@ -145,7 +152,9 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
             setActiveNoteIndex(-1); // Root Playing
             // Initial Tip
             if (isFirstGlobalStep) {
-               setCurrentTip(intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' }));
+              setCurrentTip(
+                intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' }),
+              );
             }
           }, t);
           samplerRef.current?.triggerAttackRelease(rootNoteName, rootWaitS, t);
@@ -154,14 +163,14 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
         currentTime += rootWaitS;
 
         // --- 2. Melody Phase ---
-        
+
         // Update Tip for melody phase (random rotation after first step)
         Tone.Transport.schedule((t) => {
-            Tone.Draw.schedule(() => {
-                if (!isFirstGlobalStep) {
-                    setCurrentTip(getRandomTip());
-                }
-            }, t);
+          Tone.Draw.schedule(() => {
+            if (!isFirstGlobalStep) {
+              setCurrentTip(getRandomTip());
+            }
+          }, t);
         }, currentTime);
 
         for (let idx = 0; idx < PATTERN_OFFSETS.length; idx++) {
@@ -208,6 +217,8 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   ]);
 
   const { status: instrumentStatus } = useInstrumentStatus('piano');
+  const instrumentStatusRef = useRef(instrumentStatus);
+  instrumentStatusRef.current = instrumentStatus;
 
   const startSequence = useCallback(async () => {
     // Resume context first
@@ -237,17 +248,31 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
     };
 
     // Check instrument status
-    if (instrumentStatus === 'loaded') {
+    if (instrumentStatusRef.current === 'loaded') {
       loadInstrument('piano').then((sampler) => {
         samplerRef.current = sampler;
+        setUsingMidi(false);
         run();
       });
     } else {
       console.log('Instrument not loaded, falling back to synth');
       samplerRef.current = new Tone.PolySynth(Tone.Synth).toDestination();
+      setUsingMidi(true);
       run();
     }
-  }, [countdown, startExercise, instrumentStatus]);
+  }, [countdown, startExercise]);
+
+  useEffect(() => {
+    if (visible && usingMidi && instrumentStatus === 'loaded') {
+      loadInstrument('piano').then((sampler) => {
+        samplerRef.current = sampler;
+        setUsingMidi(false);
+        message.success(
+          intl.formatMessage({ id: 'vocal.ma-exercise.piano-loaded' }),
+        );
+      });
+    }
+  }, [visible, usingMidi, instrumentStatus, intl]);
 
   useEffect(() => {
     if (!visible) {
@@ -269,7 +294,11 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
       style={{ maxWidth: 800 }}
       centered
       maskClosable={false}
-      title={isPlaying ? `${currentCycle}/${loopCount} - ${currentStepInCycle}/${totalStepsInCycle}` : intl.formatMessage({ id: 'vocal.ma-exercise.title' })}
+      title={
+        isPlaying
+          ? `${currentCycle}/${loopCount} - ${currentStepInCycle}/${totalStepsInCycle}`
+          : intl.formatMessage({ id: 'vocal.ma-exercise.title' })
+      }
     >
       <div className="ma-exercise-player-container">
         {/* Countdown Overlay */}
@@ -287,74 +316,82 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
           </div>
         )}
 
+        {usingMidi && (
+          <Alert
+            type="warning"
+            showIcon
+            title={intl.formatMessage({ id: 'vocal.ma-exercise.midi-warning' })}
+            style={{ marginBottom: 16 }}
+            closable
+          />
+        )}
+
         {/* Main Content */}
-          <Space orientation="vertical" size={32} className="player-content">
-            {/* Main Display Area */}
-            <div className="display-area">
-              <Card
-                className="display-card"
-                variant="borderless"
+        <Space orientation="vertical" size={32} className="player-content">
+          {/* Main Display Area */}
+          <div className="display-area">
+            <Card className="display-card" variant="borderless">
+              <Typography.Text
+                strong
+                className="display-tip"
+                style={{ color: token.colorTextSecondary }}
               >
-                <Typography.Text
-                  strong
-                  className="display-tip"
-                  style={{ color: token.colorTextSecondary }}
-                >
-                  {isPlaying
-                    ? currentTip
-                    : intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' })}
-                </Typography.Text>
-              </Card>
+                {isPlaying
+                  ? currentTip
+                  : intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' })}
+              </Typography.Text>
+            </Card>
+          </div>
+
+          {/* Visualization Area */}
+          <div className="visualization-area">
+            {currentPatternNotes.length > 0 ? (
+              currentPatternNotes.map((note, index) => {
+                const isCurrent = activeNoteIndex === index;
+                return (
+                  <div
+                    key={index}
+                    className={`note-circle ${isCurrent ? 'note-circle-active' : ''}`}
+                  >
+                    {note}
+                  </div>
+                );
+              })
+            ) : (
+              <Typography.Title
+                level={4}
+                type="secondary"
+                className="visualization-ready"
+              >
+                READY TO TRAIN
+              </Typography.Title>
+            )}
+          </div>
+
+          <Space orientation="vertical" size={16} className="controls-area">
+            <div
+              className="current-note-name"
+              style={{ color: token.colorText }}
+            >
+              {currentNote || '-'}
             </div>
 
-            {/* Visualization Area */}
-            <div className="visualization-area">
-              {currentPatternNotes.length > 0 ? (
-                currentPatternNotes.map((note, index) => {
-                  const isCurrent = activeNoteIndex === index;
-                  return (
-                    <div
-                      key={index}
-                      className={`note-circle ${isCurrent ? 'note-circle-active' : ''}`}>
-                      {note}
-                    </div>
-                  );
-                })
-              ) : (
-                <Typography.Title
-                  level={4}
-                  type="secondary"
-                  className="visualization-ready"
-                >
-                  READY TO TRAIN
-                </Typography.Title>
-              )}
-            </div>
-
-            <Space orientation="vertical" size={16} className="controls-area">
-              <div
-                className="current-note-name"
-                style={{ color: token.colorText }}
-              >
-                {currentNote || '-'}
-              </div>
-
-              <Button
-                type="primary"
-                size="large"
-                shape="round"
-                icon={isPaused ? <CaretRightOutlined /> : <PauseOutlined />}
-                onClick={togglePause}
-                style={{ width: 160 }}
-              >
-                {intl.formatMessage({
-                  id: isPaused
-                    ? 'vocal.ma-exercise.resume'
-                    : 'vocal.ma-exercise.pause',
-                })}
-              </Button>
-            </Space>
+            <Button
+              type="primary"
+              size="large"
+              shape="round"
+              icon={isPaused ? <CaretRightOutlined /> : <PauseOutlined />}
+              onClick={togglePause}
+              style={{ width: 160 }}
+            >
+              {intl.formatMessage({
+                id: isPaused
+                  ? 'vocal.ma-exercise.resume'
+                  : 'vocal.ma-exercise.pause',
+              })}
+            </Button>
           </Space>
+        </Space>
       </div>
     </Modal>
   );
