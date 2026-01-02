@@ -39,6 +39,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
   const startTimeRef = useRef<number>(0);
   const questionStartTimeRef = useRef<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const totalAttemptsRef = useRef(0);
   const sessionStatsRef = useRef<{ timeTaken: number; correct: boolean }[]>([]);
 
   const flattenTones = useMemo(() => {
@@ -127,7 +128,10 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
 
       setScore((s) => s + 1);
       setCorrectCount((c) => c + 1);
-      setTotalAttempts((a) => a + 1);
+      setTotalAttempts((a) => {
+        totalAttemptsRef.current = a + 1;
+        return a + 1;
+      });
 
       const isFirstTry = wrongOptions.length === 0;
       if (isFirstTry) {
@@ -154,7 +158,10 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
       // Wrong
       if (!wrongOptions.includes(selected)) {
         setWrongOptions((prev) => [...prev, selected]);
-        setTotalAttempts((a) => a + 1);
+        setTotalAttempts((a) => {
+          totalAttemptsRef.current = a + 1;
+          return a + 1;
+        });
         setConsecutiveCorrect(0);
       }
     }
@@ -164,7 +171,13 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
     if (sessionStatsRef.current.length === 0) return null;
 
     const duration = (Date.now() - startTimeRef.current) / 1000;
-    const accuracy = totalAttempts > 0 ? correctCount / totalAttempts : 0;
+    // Use refs for accurate calculation in closures
+    const currentCorrectCount = sessionStatsRef.current.length;
+    // Calculate total attempts from ref
+    const currentTotalAttempts = totalAttemptsRef.current;
+
+    const accuracy =
+      currentTotalAttempts > 0 ? currentCorrectCount / currentTotalAttempts : 0;
     const avgResponseTime =
       sessionStatsRef.current.reduce((acc, curr) => acc + curr.timeTaken, 0) /
       sessionStatsRef.current.length;
@@ -173,7 +186,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
       timestamp: Date.now(),
       difficulty: settings.difficulty,
       mode: settings.mode,
-      correctCount,
+      correctCount: currentCorrectCount,
       totalQuestions: sessionStatsRef.current.length,
       accuracy,
       avgResponseTime,
@@ -181,7 +194,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
     };
 
     addIdentificationStat(stat);
-    return { accuracy, avgResponseTime };
+    return stat;
   };
 
   const handleGameOver = () => {
@@ -198,7 +211,7 @@ const IdentificationGame: React.FC<IdentificationGameProps> = ({
           <p>
             {intl.formatMessage(
               { id: 'game.over.correct-count' },
-              { count: correctCount },
+              { count: stats.correctCount },
             )}
           </p>
           <p>
