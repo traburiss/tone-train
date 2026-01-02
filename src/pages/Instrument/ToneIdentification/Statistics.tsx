@@ -1,5 +1,5 @@
-import { Button, Card, Empty, Select, Space, Statistic, Table } from 'antd';
 import { useIntl } from '@umijs/max';
+import { Button, Card, Empty, Select, Space, Statistic, Table } from 'antd';
 import React, { useMemo, useState } from 'react';
 import { clearIdentificationStats, getIdentificationStats } from './statsStore';
 
@@ -8,35 +8,49 @@ const HistoryChart: React.FC<{
   label: string;
   color: string;
   suffix?: string;
-}> = ({ data, label, color = '' }) => {
+}> = ({ data, label, color = '', suffix = '' }) => {
   const intl = useIntl();
-  if (data.length === 0)
-    return (
-      <Empty
-        description={intl.formatMessage({ id: 'common.no-data' })}
-      />
-    );
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [width, setWidth] = React.useState(0);
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
-  const width = 600;
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  if (data.length === 0)
+    return <Empty description={intl.formatMessage({ id: 'common.no-data' })} />;
+
   const height = 200;
   const padding = 20;
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 2;
 
+  // Avoid division by zero if width is not yet determined
+  if (width === 0) {
+    return <div ref={containerRef} style={{ height }} className="w-full" />;
+  }
+
   const max = Math.max(...data, 1);
   const min = 0;
   const range = max - min;
 
-  const points = data
-    .map((val, i) => {
-      const x = padding + (i / (data.length - 1 || 1)) * chartWidth;
-      const y = padding + chartHeight - ((val - min) / range) * chartHeight;
-      return `${x},${y}`;
-    })
-    .join(' ');
+  const getX = (i: number) =>
+    padding + (i / (data.length - 1 || 1)) * chartWidth;
+  const getY = (val: number) =>
+    padding + chartHeight - ((val - min) / range) * chartHeight;
+
+  const points = data.map((val, i) => `${getX(i)},${getY(val)}`).join(' ');
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full relative" ref={containerRef}>
       <div className="font-semibold mb-2">{label}</div>
       <svg width={width} height={height} className="bg-gray-50 rounded">
         {/* Grid lines */}
@@ -59,22 +73,75 @@ const HistoryChart: React.FC<{
           strokeLinejoin="round"
           points={points}
         />
-        {/* Points */}
+        {/* Points - Rendered only for visual, interactions are on overlay */}
+        {data.map((val, i) => (
+          <circle
+            key={i}
+            cx={getX(i)}
+            cy={getY(val)}
+            r={hoveredIndex === i ? 6 : 4}
+            fill={color}
+            style={{ transition: 'r 0.2s' }}
+          />
+        ))}
+        {/* Interaction Overlay using transparent rect columns */}
         {data.map((val, i) => {
-          const x = padding + (i / (data.length - 1 || 1)) * chartWidth;
-          const y = padding + chartHeight - ((val - min) / range) * chartHeight;
+          // Calculate the width of each "slice" for hover detection
+          // We divide the total chart width by the number of points (roughly)
+          // to create touch targets that touch each other.
+          const stepWidth = chartWidth / (data.length - 1 || 1);
+          // Logic to center the rect around the point:
+          // If it's the first point, start at 0, width is half step + padding
+          // If middle, start at x - half step, width is step
+          // If last, start at x - half step, width is half step + padding
+
+          // Simplified approach: equal slices
+          // x start position of the slice
+          let sliceX = getX(i) - stepWidth / 2;
+          let sliceWidth = stepWidth;
+
+          // Edge adjustments
+          if (i === 0) {
+            sliceX = 0;
+            sliceWidth = padding + stepWidth / 2;
+          } else if (i === data.length - 1) {
+            sliceWidth = padding + stepWidth / 2;
+          }
+
+          // For single point case
+          if (data.length === 1) {
+            sliceX = 0;
+            sliceWidth = width;
+          }
+
           return (
-            <circle
-              key={i}
-              cx={x}
-              cy={y}
-              r="4"
-              fill={color}
-              onMouseEnter={() => {}} // Could add tooltip
+            <rect
+              key={`overlay-${i}`}
+              x={sliceX}
+              y={0}
+              width={sliceWidth}
+              height={height}
+              fill="transparent"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{ cursor: 'crosshair' }}
             />
           );
         })}
       </svg>
+      {/* Tooltip */}
+      {hoveredIndex !== null && (
+        <div
+          className="absolute bg-black/75 text-white text-xs px-2 py-1 rounded pointer-events-none z-10 transform -translate-x-1/2 -translate-y-full"
+          style={{
+            left: getX(hoveredIndex),
+            top: getY(data[hoveredIndex]) - 8,
+          }}
+        >
+          {data[hoveredIndex].toFixed(2)}
+          {suffix}
+        </div>
+      )}
       <div className="flex justify-between text-xs text-gray-400 mt-1 px-5">
         <span>{intl.formatMessage({ id: 'common.earlier' })}</span>
         <span>{intl.formatMessage({ id: 'common.recent' })}</span>
@@ -127,10 +194,7 @@ const Statistics: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card
-        title={intl.formatMessage({ id: 'stats.config' })}
-        size="small"
-      >
+      <Card title={intl.formatMessage({ id: 'stats.config' })} size="small">
         <Space wrap size={16}>
           <div>
             <span className="mr-2">
@@ -323,6 +387,5 @@ const Statistics: React.FC = () => {
     </div>
   );
 };
-
 
 export default Statistics;
