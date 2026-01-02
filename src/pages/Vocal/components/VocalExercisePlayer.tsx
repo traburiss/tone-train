@@ -14,28 +14,30 @@ import {
 } from 'antd';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import * as Tone from 'tone';
-import './MaExercisePlayer.less';
+import './VocalExercisePlayer.less';
 
-interface MaExercisePlayerProps {
+interface VocalExercisePlayerProps {
   visible: boolean;
   onClose: () => void;
+  patternOffsets: number[]; // e.g. [7, 5, 4, 2, 0] or [0, 2, 4, 5, 7, 5, 4, 2, 0]
+  localizationPrefix: string;
   startNote: string;
   endNote: string;
-  rootNoteWait: number; // ms
+  rootNoteWait: number;
   firstNoteDuration: number;
   intervalDuration: number;
   lastNoteDuration: number;
   postMelodyWait: number;
   loopCount: number;
   countdown: number;
+  bpm: number;
 }
 
-// 5-note Descending Pattern (Perfect 5th range: Sol-Fa-Mi-Re-Do)
-const PATTERN_OFFSETS = [7, 5, 4, 2, 0];
-
-const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
+const VocalExercisePlayer: React.FC<VocalExercisePlayerProps> = ({
   visible,
   onClose,
+  patternOffsets,
+  localizationPrefix,
   startNote,
   endNote,
   rootNoteWait = 1500,
@@ -45,6 +47,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   postMelodyWait = 1000,
   loopCount = 2,
   countdown = 3000,
+  bpm = 60,
 }) => {
   const intl = useIntl();
   const { token } = theme.useToken();
@@ -57,7 +60,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   const [currentCycle, setCurrentCycle] = useState(1);
   const [totalStepsInCycle, setTotalStepsInCycle] = useState(0);
   const [currentStepInCycle, setCurrentStepInCycle] = useState(1);
-  const [activeNoteIndex, setActiveNoteIndex] = useState<number | null>(null); // -1: Root, 0-4: Pattern, null: idle
+  const [activeNoteIndex, setActiveNoteIndex] = useState<number | null>(null);
 
   const [currentNote, setCurrentNote] = useState<string>('');
   const [currentTip, setCurrentTip] = useState<string>('');
@@ -65,16 +68,20 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   const samplerRef = useRef<Tone.Sampler | Tone.PolySynth | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const tips = useRef([
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.1' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.2' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.3' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.4' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.5' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.6' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.7' }),
-    intl.formatMessage({ id: 'vocal.ma-exercise.tip.8' }),
-  ]);
+  // Load tips
+  const tips = useRef<string[]>([]);
+  useEffect(() => {
+    const loadedTips: string[] = [];
+    let i = 1;
+    while (true) {
+      const id = `${localizationPrefix}.tip.${i}`;
+      const text = intl.formatMessage({ id, defaultMessage: 'END' });
+      if (text === 'END' || text === id) break;
+      loadedTips.push(text);
+      i++;
+    }
+    tips.current = loadedTips;
+  }, [localizationPrefix, intl]);
 
   const stopExercise = useCallback(() => {
     Tone.Transport.stop();
@@ -92,6 +99,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   }, []);
 
   const getRandomTip = useCallback(() => {
+    if (tips.current.length === 0) return '';
     const randomIndex = Math.floor(Math.random() * tips.current.length);
     return tips.current[randomIndex];
   }, []);
@@ -113,15 +121,17 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
     setCurrentCycle(1);
     setCurrentStepInCycle(1);
     Tone.Transport.cancel();
+    Tone.Transport.bpm.value = bpm;
 
     const startMidi = Tone.Frequency(startNote).toMidi();
     const endMidi = Tone.Frequency(endNote).toMidi();
+    const direction = endMidi >= startMidi ? 1 : -1;
     const totalSteps = Math.abs(endMidi - startMidi);
     setTotalStepsInCycle(totalSteps + 1);
 
     let currentTime = 0;
 
-    // Convert ms to s for Tone.js
+    // Convert ms to s
     const rootWaitS = rootNoteWait / 1000;
     const firstDurS = firstNoteDuration / 1000;
     const intervalDurS = intervalDuration / 1000;
@@ -129,12 +139,10 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
     const postWaitS = postMelodyWait / 1000;
 
     for (let loop = 0; loop < loopCount; loop++) {
-      const direction = endMidi >= startMidi ? 1 : -1;
-
       for (let i = 0; i <= totalSteps; i++) {
         const rootMidi = startMidi + i * direction;
         const rootNoteName = Tone.Frequency(rootMidi, 'midi').toNote();
-        const patternNoteNames = PATTERN_OFFSETS.map((offset) =>
+        const patternNoteNames = patternOffsets.map((offset) =>
           Tone.Frequency(rootMidi + offset, 'midi').toNote(),
         );
 
@@ -150,10 +158,9 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
             setCurrentPatternNotes(patternNoteNames);
             setCurrentNote(rootNoteName);
             setActiveNoteIndex(-1); // Root Playing
-            // Initial Tip
             if (isFirstGlobalStep) {
               setCurrentTip(
-                intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' }),
+                intl.formatMessage({ id: `${localizationPrefix}.tip.0` }),
               );
             }
           }, t);
@@ -163,8 +170,6 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
         currentTime += rootWaitS;
 
         // --- 2. Melody Phase ---
-
-        // Update Tip for melody phase (random rotation after first step)
         Tone.Transport.schedule((t) => {
           Tone.Draw.schedule(() => {
             if (!isFirstGlobalStep) {
@@ -173,17 +178,17 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
           }, t);
         }, currentTime);
 
-        for (let idx = 0; idx < PATTERN_OFFSETS.length; idx++) {
-          const noteMidi = rootMidi + PATTERN_OFFSETS[idx];
+        for (let idx = 0; idx < patternOffsets.length; idx++) {
+          const noteMidi = rootMidi + patternOffsets[idx];
           const noteName = Tone.Frequency(noteMidi, 'midi').toNote();
           let duration = intervalDurS;
           if (idx === 0) duration = firstDurS;
-          else if (idx === PATTERN_OFFSETS.length - 1) duration = lastDurS;
+          else if (idx === patternOffsets.length - 1) duration = lastDurS;
 
           Tone.Transport.schedule((t) => {
             Tone.Draw.schedule(() => {
               setCurrentNote(noteName);
-              setActiveNoteIndex(idx); // Highlight current note
+              setActiveNoteIndex(idx);
             }, t);
             samplerRef.current?.triggerAttackRelease(noteName, duration, t);
           }, currentTime);
@@ -211,9 +216,12 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
     lastNoteDuration,
     postMelodyWait,
     loopCount,
+    bpm,
     intl,
     getRandomTip,
     stopExercise,
+    patternOffsets,
+    localizationPrefix,
   ]);
 
   const { status: instrumentStatus } = useInstrumentStatus('piano');
@@ -221,7 +229,6 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   instrumentStatusRef.current = instrumentStatus;
 
   const startSequence = useCallback(async () => {
-    // Resume context first
     await Tone.context.resume();
     await Tone.start();
 
@@ -247,7 +254,6 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
       }
     };
 
-    // Check instrument status
     if (instrumentStatusRef.current === 'loaded') {
       loadInstrument('piano').then((sampler) => {
         samplerRef.current = sampler;
@@ -279,7 +285,6 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
       stopExercise();
       return;
     }
-    // Start sequence immediately when visible
     startSequence();
     return () => stopExercise();
   }, [visible, startSequence, stopExercise]);
@@ -297,10 +302,10 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
       title={
         isPlaying
           ? `${currentCycle}/${loopCount} - ${currentStepInCycle}/${totalStepsInCycle}`
-          : intl.formatMessage({ id: 'vocal.ma-exercise.title' })
+          : intl.formatMessage({ id: `${localizationPrefix}.title` })
       }
     >
-      <div className="ma-exercise-player-container">
+      <div className="vocal-player-container">
         {/* Countdown Overlay */}
         {countdownValue !== null && (
           <div className="countdown-overlay">
@@ -338,7 +343,7 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
               >
                 {isPlaying
                   ? currentTip
-                  : intl.formatMessage({ id: 'vocal.ma-exercise.tip.0' })}
+                  : intl.formatMessage({ id: `${localizationPrefix}.tip.0` })}
               </Typography.Text>
             </Card>
           </div>
@@ -397,4 +402,4 @@ const MaExercisePlayer: React.FC<MaExercisePlayerProps> = ({
   );
 };
 
-export default MaExercisePlayer;
+export default VocalExercisePlayer;

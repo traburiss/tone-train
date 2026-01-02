@@ -9,7 +9,11 @@ export default {
   'home.settings.subtitle': 'Manage your application configuration',
   'home.settings.desc':
     'Supports import/export, reset, and source code editing.',
-  'home.training.vocal.ma-exercise.subtitle': 'Vocal Warm-up & Training',
+  'home.training.vocal.ma-exercise.subtitle':
+    'Vocal Practice: Finding Placement',
   'home.training.vocal.ma-exercise.desc':
-    'Improve your singing skills through scientific vocal exercises; supports various modes and real-time guidance.',
+    "Practice the 'Ma' sound to help find the correct vocal placement.",
+  'home.training.vocal.resonance.subtitle': 'Integrating Resonance into Phonation',
+  'home.training.vocal.resonance.desc':
+    'Through vowel articulation practice, better integrate resonance into song articulation.',
 };

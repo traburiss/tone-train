@@ -1,4 +1,4 @@
-import { VOCAL_MA_EXERCISE_STORAGE_KEY } from '@/constants';
+import { VOCAL_RESONANCE_EXERCISE_STORAGE_KEY } from '@/constants';
 import { getPageSettings, setPageSettings } from '@/utils/storage';
 import { loadInstrument } from '@/utils/toneInstruments';
 import {
@@ -14,10 +14,10 @@ import './index.less';
 
 const DEFAULT_SETTINGS = {
   preset: 'male',
-  startNote: 'B2',
-  endNote: 'B3',
+  startNote: 'C3',
+  endNote: 'C4',
   rootNoteWait: 1500,
-  firstNoteDuration: 1500,
+  firstNoteDuration: 1000,
   intervalDuration: 500,
   lastNoteDuration: 1500,
   postMelodyWait: 1000,
@@ -26,15 +26,15 @@ const DEFAULT_SETTINGS = {
   bpm: 60,
 };
 
-// Ma Exercise Pattern: [7, 5, 4, 2, 0]
-const PATTERN_OFFSETS = [7, 5, 4, 2, 0];
+// Resonance Pattern: [0, 2, 4, 5, 7, 5, 4, 2, 0]
+const PATTERN_OFFSETS = [0, 2, 4, 5, 7, 5, 4, 2, 0];
 
 const PRESETS = {
-  male: { startNote: 'B2', endNote: 'B3' },
-  female: { startNote: 'F3', endNote: 'D4' },
+  male: { startNote: 'C3', endNote: 'C4' },
+  female: { startNote: 'G3', endNote: 'E4' },
 };
 
-const MaExercisePage: React.FC = () => {
+const ResonancePage: React.FC = () => {
   const intl = useIntl();
   const [form] = ProForm.useForm();
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,7 +43,7 @@ const MaExercisePage: React.FC = () => {
 
   useEffect(() => {
     const saved = getPageSettings(
-      VOCAL_MA_EXERCISE_STORAGE_KEY,
+      VOCAL_RESONANCE_EXERCISE_STORAGE_KEY,
       DEFAULT_SETTINGS,
     );
     if (saved) {
@@ -51,7 +51,7 @@ const MaExercisePage: React.FC = () => {
       form.setFieldsValue(saved);
     }
 
-    // Preload piano instrument when entering the page
+    // Preload piano instrument
     loadInstrument('piano').catch((e) => {
       console.error('Failed to preload instrument:', e);
     });
@@ -59,9 +59,9 @@ const MaExercisePage: React.FC = () => {
 
   const onValuesChange = (_: any, allValues: any) => {
     setPageSettings(
-      VOCAL_MA_EXERCISE_STORAGE_KEY,
+      VOCAL_RESONANCE_EXERCISE_STORAGE_KEY,
       allValues,
-      intl.formatMessage({ id: 'vocal.ma-exercise.title' }),
+      intl.formatMessage({ id: 'vocal.resonance.title' }),
     );
   };
 
@@ -73,7 +73,7 @@ const MaExercisePage: React.FC = () => {
   return (
     <PageContainer
       header={{
-        title: intl.formatMessage({ id: 'vocal.ma-exercise.title' }),
+        title: intl.formatMessage({ id: 'vocal.resonance.title' }),
       }}
     >
       <ProForm
@@ -85,16 +85,16 @@ const MaExercisePage: React.FC = () => {
           render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
           searchConfig: {
             resetText: intl.formatMessage({ id: 'common.reset' }),
-            submitText: intl.formatMessage({ id: 'vocal.ma-exercise.start' }),
+            submitText: intl.formatMessage({ id: 'vocal.resonance.start' }),
           },
         }}
         layout="vertical"
-        className="ma-exercise-container"
+        className="resonance-exercise-container"
       >
-        <div className="ma-exercise-settings-wrapper">
+        <div className="resonance-exercise-settings-wrapper">
           <VocalExerciseSettings
             presets={PRESETS}
-            localizationPrefix="vocal.ma-exercise"
+            localizationPrefix="vocal.resonance"
           />
         </div>
       </ProForm>
@@ -103,11 +103,11 @@ const MaExercisePage: React.FC = () => {
         visible={modalOpen}
         onClose={() => setModalOpen(false)}
         patternOffsets={PATTERN_OFFSETS}
-        localizationPrefix="vocal.ma-exercise"
+        localizationPrefix="vocal.resonance"
         {...settings}
       />
     </PageContainer>
   );
 };
 
-export default MaExercisePage;
+export default ResonancePage;

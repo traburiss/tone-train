@@ -59,6 +59,13 @@ export default defineConfig({
           key: 'menu.vocal.ma-exercise',
           icon: 'SoundOutlined',
         },
+        {
+          title: 'menu.vocal.resonance',
+          path: '/vocal/resonance',
+          component: './Vocal/Resonance',
+          key: 'menu.vocal.resonance',
+          icon: 'SoundOutlined',
+        },
       ],
     },
     {

@@ -1,6 +1,6 @@
 @import '@/styles/mobile.less';
 
-.ma-exercise-player-container {
+.vocal-player-container {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -37,11 +37,6 @@
   letter-spacing: 2px;
 }
 
-.loading-container {
-  padding: 48px;
-  text-align: center;
-}
-
 .player-content {
   display: flex;
   flex-direction: column;
@@ -65,16 +60,16 @@
   border: none;
   background: transparent;
   box-shadow: none !important;
-}
 
-.display-title {
-  margin-top: 0;
-  margin-bottom: 12px;
-  font-size: 48px;
+  .ant-card-body {
+    width: 100%;
+    text-align: center;
+    padding: 32px;
+  }
 }
 
 .display-tip {
-  font-size: 2rem; /* text-lg */
+  font-size: 1.5rem; /* text-lg */
   font-weight: 700; /* font-bold */
   display: block;
   min-height: 27px;
@@ -87,11 +82,6 @@
   gap: 12px; /* gap-3 */
   padding-left: 12px;
   padding-right: 12px;
-}
-
-.visualization-ready {
-  margin: 0 !important;
-  letter-spacing: 0.1em; /* tracking-widest */
 }
 
 .note-circle {
@@ -110,37 +100,39 @@
   background: var(--ant-color-fill-secondary);
   border-color: var(--ant-color-fill-secondary);
   color: var(--ant-color-text);
+
+  &.note-circle-active {
+    transform: scale(1.25); /* scale-125 */
+    z-index: 2;
+    background: var(--ant-color-primary);
+    border-color: var(--ant-color-primary);
+    color: #fff;
+  }
 }
 
-.note-circle-active {
-  transform: scale(1.25); /* scale-125 */
-  z-index: 2;
-  background: var(--ant-color-primary);
-  border-color: var(--ant-color-primary);
-  color: #fff;
+.visualization-ready {
+  margin: 0 !important;
+  letter-spacing: 2px;
 }
 
 .controls-area {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
   align-items: center;
-  gap: 16px;
 }
 
 .current-note-name {
-  font-weight: 800; /* font-extrabold */
-  font-family: monospace; /* font-mono */
-  line-height: 1;
-  font-size: 64px;
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: monospace;
+  height: 3rem;
+  display: flex;
+  align-items: center;
 }
 
-.stop-button {
-  height: 3rem !important; /* h-12 */
-  padding-left: 2rem !important; /* px-8 */
-  padding-right: 2rem !important;
-}
-
-:global(.ant-modal-content) {
-  padding: 0 !important;
-  overflow: hidden;
+@media (max-width: 767px) {
+  .note-circle {
+    width: 2rem; /* w-14 */
+    height: 2rem; /* h-14 */
+    font-size: 1rem;
+  }
 }

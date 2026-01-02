@@ -8,7 +8,10 @@ export default {
     '通过听音后从多个选项中选出正确和弦/单音的模式，提高自己对和弦与单音的音感',
   'home.settings.subtitle': '管理您的应用配置',
   'home.settings.desc': '支持导入导出、重置及源码编辑',
-  'home.training.vocal.ma-exercise.subtitle': '科学练声，循序渐进',
+  'home.training.vocal.ma-exercise.subtitle': '发音练习, 找对位置',
   'home.training.vocal.ma-exercise.desc':
-    '通过科学的练声曲目，循序渐进地提升唱功；支持多种练声模式和实时反馈',
+    '通过 ma 音练习，可以帮助我们找到好的发声位置',
+  'home.training.vocal.resonance.subtitle': '共鸣融合到发声里',
+  'home.training.vocal.resonance.desc':
+    '通过元音咬字练习，更好的将共鸣融合到歌曲咬字里面',
 };

@@ -5,43 +5,52 @@ import {
   MIX_DURATION,
 } from '@/constants';
 import {
+  ProForm,
   ProFormDependency,
   ProFormRadio,
   ProFormSelect,
   ProFormSlider,
 } from '@ant-design/pro-components';
 import { useIntl } from '@umijs/max';
-import { Card, Divider, Form, Space } from 'antd';
+import { Card, Space } from 'antd';
 import React from 'react';
-import './MaExerciseSettings.less';
+import * as Tone from 'tone';
+import './VocalExerciseSettings.less';
 
-// Generate notes from C2 to C6
-const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+// Generate notes from A2 to C6 (covering full vocal range)
 const generateNotes = () => {
   const notes = [];
-  for (let i = 2; i <= 5; i++) {
-    NOTES.forEach((note) => notes.push(`${note}${i}`));
+  const startMidi = Tone.Frequency('A2').toMidi();
+  const endMidi = Tone.Frequency('C6').toMidi();
+
+  for (let i = startMidi; i <= endMidi; i++) {
+    notes.push(Tone.Frequency(i, 'midi').toNote());
   }
-  notes.push('C6');
   return notes;
 };
 const NOTE_OPTIONS = generateNotes().map((n) => ({ label: n, value: n }));
 
-const MaExerciseSettings: React.FC = () => {
+interface VocalExerciseSettingsProps {
+  presets: Record<string, { startNote: string; endNote: string }>;
+  localizationPrefix: string; // e.g., 'vocal.ma-exercise' or 'vocal.resonance'
+}
+
+const VocalExerciseSettings: React.FC<VocalExerciseSettingsProps> = ({
+  presets,
+  localizationPrefix,
+}) => {
   const intl = useIntl();
-  const form = Form.useFormInstance();
+  const form = ProForm.useFormInstance();
   const durationFormatter = GET_DURATION_FORMATTER(intl);
 
   const handlePresetChange = (value: string) => {
-    if (value === 'male') {
-      form.setFieldsValue({ startNote: 'B2', endNote: 'B3' });
-    } else if (value === 'female') {
-      form.setFieldsValue({ startNote: 'F3', endNote: 'D4' });
+    if (presets[value]) {
+      form?.setFieldsValue(presets[value]);
     }
   };
 
   return (
-    <div className="settings-container">
+    <div className="vocal-settings-container">
       {/* Group 1: Range Selection */}
       <Card
         title={intl.formatMessage({
@@ -59,13 +68,13 @@ const MaExerciseSettings: React.FC = () => {
           options={[
             {
               label: intl.formatMessage({
-                id: 'vocal.ma-exercise.settings.preset.male',
+                id: `${localizationPrefix}.settings.preset.male`,
               }),
               value: 'male',
             },
             {
               label: intl.formatMessage({
-                id: 'vocal.ma-exercise.settings.preset.female',
+                id: `${localizationPrefix}.settings.preset.female`,
               }),
               value: 'female',
             },
@@ -90,8 +99,8 @@ const MaExerciseSettings: React.FC = () => {
               <Space
                 direction="horizontal"
                 size={window.innerWidth < 640 ? 0 : 16}
-                wrap={window.innerWidth < 640}
-                style={{ width: '100%' }}
+                wrap
+                style={{ width: '100%', marginTop: 16 }}
               >
                 <ProFormSelect
                   name="startNote"
@@ -101,8 +110,8 @@ const MaExerciseSettings: React.FC = () => {
                   options={NOTE_OPTIONS}
                   width="sm"
                   disabled={!isCustom}
+                  rules={[{ required: true }]}
                 />
-                <Divider type="vertical" className="range-divider" />
                 <ProFormSelect
                   name="endNote"
                   label={intl.formatMessage({
@@ -111,6 +120,7 @@ const MaExerciseSettings: React.FC = () => {
                   options={NOTE_OPTIONS}
                   width="sm"
                   disabled={!isCustom}
+                  rules={[{ required: true }]}
                 />
               </Space>
             );
@@ -221,4 +231,4 @@ const MaExerciseSettings: React.FC = () => {
   );
 };
 
-export default MaExerciseSettings;
+export default VocalExerciseSettings;

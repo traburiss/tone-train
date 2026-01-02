@@ -2,8 +2,6 @@ export default {
   'menu.vocal': 'Vocal Training',
   'menu.vocal.ma-exercise': 'Vocal Exercise',
   'vocal.ma-exercise.title': 'Vocal Exercise',
-  'vocal.ma-exercise.subTitle':
-    'Sing "ma", following a descending pentatonic scale',
   'vocal.ma-exercise.start': 'Start Training',
   'vocal.ma-exercise.stop': 'Stop Training',
   'vocal.ma-exercise.pause': 'Pause Practice',
@@ -37,4 +35,18 @@ export default {
   'vocal.ma-exercise.midi-warning': 'Using MIDI sound, piano sound loading...',
   'vocal.ma-exercise.piano-loaded':
     'Piano sound loaded, switched automatically',
+  'menu.vocal.resonance': 'Resonance Practice',
+  'vocal.resonance.title': 'Resonance Practice',
+  'vocal.resonance.start': 'Start Resonance Practice',
+  'vocal.resonance.tip.0': "Please pronounce 'mimami', 'yeyo', or 'u' sound",
+  'vocal.resonance.tip.1': "The 'u' sound is the hardest, practice it more",
+  'vocal.resonance.tip.2': 'Relax your body, open your mouth vertically',
+  'vocal.resonance.tip.3': 'Keep the sound placement at the soft palate',
+  'vocal.resonance.tip.4':
+    "When switching from closed to open vowels, maintain the placement and don't break the sound",
+  'vocal.resonance.tip.5': "Don't raise your larynx, keep a semi-yawn state",
+  'vocal.resonance.tip.6': 'Open the sound vertically, not horizontally',
+  'vocal.resonance.tip.7': "You don't need to open your mouth too wide",
+  'vocal.resonance.settings.preset.male': 'Male (C3 ~ C4)',
+  'vocal.resonance.settings.preset.female': 'Female (G3 ~ E4)',
 };

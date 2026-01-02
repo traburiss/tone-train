@@ -119,6 +119,34 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </ProCard>
+        <ProCard
+          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          layout="center"
+          bordered
+          hoverable
+          onClick={() => {
+            history.push('/vocal/resonance');
+          }}
+          title={
+            <div className="flex items-center gap-2">
+              <SoundOutlined className="text-purple-500" />
+              <span>{intl.formatMessage({ id: 'menu.vocal.resonance' })}</span>
+            </div>
+          }
+        >
+          <div className="text-gray-500 text-center py-4">
+            <div>
+              {intl.formatMessage({
+                id: 'home.training.vocal.resonance.subtitle',
+              })}
+            </div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({
+                id: 'home.training.vocal.resonance.desc',
+              })}
+            </div>
+          </div>
+        </ProCard>
       </ProCard>
 
       <ProCard

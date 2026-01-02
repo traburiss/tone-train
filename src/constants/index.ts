@@ -225,6 +225,7 @@ export const STATS_PREFIX = 'mta:sta:';
 export const TONES_TRAINING_STORAGE_KEY = 'tones:training';
 export const TONES_IDENTIFICATION_STORAGE_KEY = 'tones:identification';
 export const VOCAL_MA_EXERCISE_STORAGE_KEY = 'vocal:ma-exercise';
+export const VOCAL_RESONANCE_EXERCISE_STORAGE_KEY = 'vocal:resonance';
 
 export const CONFIG_kEY_LIST = [
   {
@@ -238,5 +239,9 @@ export const CONFIG_kEY_LIST = [
   {
     name: 'vocal.ma-exercise.title',
     key: VOCAL_MA_EXERCISE_STORAGE_KEY,
+  },
+  {
+    name: 'vocal.resonance.title',
+    key: VOCAL_RESONANCE_EXERCISE_STORAGE_KEY,
   },
 ];
