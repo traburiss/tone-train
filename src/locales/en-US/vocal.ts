@@ -49,4 +49,26 @@ export default {
   'vocal.resonance.tip.7': "You don't need to open your mouth too wide",
   'vocal.resonance.settings.preset.male': 'Male (C3 ~ C4)',
   'vocal.resonance.settings.preset.female': 'Female (G3 ~ E4)',
+  'menu.vocal.range-extension': 'Range Extension',
+  'vocal.range-extension.title': 'Range Extension',
+  'vocal.range-extension.settings.preset.male': 'Male (D3 ~ #A3)',
+  'vocal.range-extension.settings.preset.female': 'Female (G3 ~ D4)',
+  'vocal.range-extension.tip.0': 'Sing "e"',
+  'vocal.range-extension.tip.1':
+    'Find the vocal cord closure through vocal fry to start phonation',
+  'vocal.range-extension.tip.2':
+    'Maintain the "e" vowel articulation, inner mouth should be open',
+  'vocal.range-extension.tip.3': 'Do not raise your larynx',
+  'vocal.range-extension.tip.4': 'Keep the oral cavity open as if inhaling',
+  'vocal.range-extension.tip.5': 'Get energized',
+  'vocal.range-extension.tip.6':
+    'Maintain breath support near the passaggio, do not loosen closure',
+  'vocal.range-extension.tip.7':
+    'Continuously maintain vocal cord closure, do not leak air',
+  'vocal.range-extension.tip.8':
+    'This note requires higher vocal function capabilities',
+  'vocal.range-extension.tip.9': 'Keep waist and abdomen tight',
+  'home.training.vocal.range-extension.subtitle': 'Expand Vocal Range',
+  'home.training.vocal.range-extension.desc':
+    'Practice to safely extend your vocal range',
 };

@@ -73,4 +73,5 @@ export default {
   'table.column.score': '得分',
   'table.column.accuracy': '准确率',
   'table.column.duration': '耗时',
+  'vocal.ready': '准备开始',
 };

@@ -66,6 +66,13 @@ export default defineConfig({
           key: 'menu.vocal.resonance',
           icon: 'SoundOutlined',
         },
+        {
+          title: 'menu.vocal.range-extension',
+          path: '/vocal/range-extension',
+          component: './Vocal/RangeExtension',
+          key: 'menu.vocal.range-extension',
+          icon: 'SoundOutlined',
+        },
       ],
     },
     {

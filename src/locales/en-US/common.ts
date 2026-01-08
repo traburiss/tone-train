@@ -75,4 +75,5 @@ export default {
   'table.column.score': 'Score',
   'table.column.accuracy': 'Accuracy',
   'table.column.duration': 'Duration',
+  'vocal.ready': 'Ready',
 };

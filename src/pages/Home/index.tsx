@@ -8,9 +8,10 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { history, useIntl } from '@umijs/max';
 import React from 'react';
 
+const DEFAULT_COL_SPAN = { xs: 24, sm: 12, md: 8, lg: 6 };
+
 const HomePage: React.FC = () => {
   const intl = useIntl();
-
   return (
     <PageContainer title={intl.formatMessage({ id: 'home.welcome' })}>
       <ProCard
@@ -21,7 +22,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={DEFAULT_COL_SPAN}
           layout="center"
           bordered
           hoverable
@@ -49,7 +50,7 @@ const HomePage: React.FC = () => {
           </div>
         </ProCard>
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={DEFAULT_COL_SPAN}
           layout="center"
           bordered
           hoverable
@@ -90,7 +91,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={DEFAULT_COL_SPAN}
           layout="center"
           bordered
           hoverable
@@ -120,7 +121,7 @@ const HomePage: React.FC = () => {
           </div>
         </ProCard>
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={DEFAULT_COL_SPAN}
           layout="center"
           bordered
           hoverable
@@ -147,6 +148,36 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </ProCard>
+        <ProCard
+          colSpan={DEFAULT_COL_SPAN}
+          layout="center"
+          bordered
+          hoverable
+          onClick={() => {
+            history.push('/vocal/range-extension');
+          }}
+          title={
+            <div className="flex items-center gap-2">
+              <AudioOutlined className="text-orange-500" />
+              <span>
+                {intl.formatMessage({ id: 'menu.vocal.range-extension' })}
+              </span>
+            </div>
+          }
+        >
+          <div className="text-gray-500 text-center py-4">
+            <div>
+              {intl.formatMessage({
+                id: 'home.training.vocal.range-extension.subtitle',
+              })}
+            </div>
+            <div className="mt-2 text-xs">
+              {intl.formatMessage({
+                id: 'home.training.vocal.range-extension.desc',
+              })}
+            </div>
+          </div>
+        </ProCard>
       </ProCard>
 
       <ProCard
@@ -157,7 +188,7 @@ const HomePage: React.FC = () => {
         style={{ marginBlockStart: 24 }}
       >
         <ProCard
-          colSpan={{ xs: 24, sm: 12, md: 8 }}
+          colSpan={DEFAULT_COL_SPAN}
           layout="center"
           bordered
           hoverable

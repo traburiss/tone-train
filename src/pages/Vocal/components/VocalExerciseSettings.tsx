@@ -33,15 +33,19 @@ const NOTE_OPTIONS = generateNotes().map((n) => ({ label: n, value: n }));
 interface VocalExerciseSettingsProps {
   presets: Record<string, { startNote: string; endNote: string }>;
   localizationPrefix: string; // e.g., 'vocal.ma-exercise' or 'vocal.resonance'
+  customPresetPrefix?: string;
 }
 
 const VocalExerciseSettings: React.FC<VocalExerciseSettingsProps> = ({
   presets,
   localizationPrefix,
+  customPresetPrefix,
 }) => {
   const intl = useIntl();
   const form = ProForm.useFormInstance();
   const durationFormatter = GET_DURATION_FORMATTER(intl);
+
+  const presetPrefix = customPresetPrefix || localizationPrefix;
 
   const handlePresetChange = (value: string) => {
     if (presets[value]) {
@@ -68,13 +72,13 @@ const VocalExerciseSettings: React.FC<VocalExerciseSettingsProps> = ({
           options={[
             {
               label: intl.formatMessage({
-                id: `${localizationPrefix}.settings.preset.male`,
+                id: `${presetPrefix}.settings.preset.male`,
               }),
               value: 'male',
             },
             {
               label: intl.formatMessage({
-                id: `${localizationPrefix}.settings.preset.female`,
+                id: `${presetPrefix}.settings.preset.female`,
               }),
               value: 'female',
             },

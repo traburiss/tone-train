@@ -316,7 +316,7 @@ const VocalExercisePlayer: React.FC<VocalExercisePlayerProps> = ({
               {countdownValue}
             </Typography.Title>
             <Typography.Text strong className="countdown-text">
-              准备开始 | Ready
+              {intl.formatMessage({ id: `vocal.ready` })}
             </Typography.Text>
           </div>
         )}
